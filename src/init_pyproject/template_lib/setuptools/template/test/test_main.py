@@ -1,6 +1,6 @@
 from unittest.mock import patch
 
-from {project_name}.main import main
+from ${project_name}.main import main
 
 @patch("{project_name}.main.say_hello")
 def test_main(mock_say_hello):

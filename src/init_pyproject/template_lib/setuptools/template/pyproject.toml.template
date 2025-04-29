@@ -3,7 +3,7 @@ requires = ["setuptools", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "{project_name}"
+name = "${project_name}"
 version = "0.1.0"
 description = "A new Python project."
 authors = [
