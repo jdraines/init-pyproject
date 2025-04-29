@@ -6,6 +6,9 @@ from pathlib import Path
 import yaml
 from typing import Any
 
+from string import Template
+
+
 template_lib_dir = Path(__file__).parent / 'template_lib'
 TEMPLATE_PROPERTIES_FILENAME = 'template_properties.yaml'
 
@@ -17,6 +20,20 @@ custom_var_type_mapper = {
     'list': lambda x: [x.strip() for x in x.split(',')],
     'dict': lambda x: dict(item.split('=') for item in x.split(',')),
 }
+
+
+def apply_templating(document: str, variables: dict[str, Any]) -> str:
+    """
+    Applies templating to the given document string using the provided variables.
+    The document can contain placeholders in the form of ${variable_name}.
+    """
+    template = Template(document)
+    try:
+        return template.safe_substitute(variables)
+    except KeyError as e:
+        raise ValueError(f"Missing variable for templating: {e}")
+    except Exception as e:
+        raise RuntimeError(f"Error applying templating: {e}")
 
 
 def get_template_dir(template_name: str) -> Path:
@@ -80,7 +97,7 @@ def walkdirs_map_all_paths(template_dir, project_name):
         rel_root = Path(root).relative_to(template_dir)
         for name in dirs + files:
             rel_path_template = rel_root / name
-            rel_path_target = Path(str(rel_path_template).format(project_name=project_name))
+            rel_path_target = Path(apply_templating(str(rel_path_template), {'project_name': project_name}))
             if str(rel_path_target).endswith('.template'):
                 rel_path_target = rel_path_target.with_suffix('')
             template_paths[str(rel_path_target)] = template_dir / rel_path_template
@@ -114,7 +131,7 @@ def scaffold_project(project_name: str, template_name: str):
         if abs_template_path.is_file():
             with open(abs_template_path, 'r') as file:
                 content = file.read()
-            content = content.format(project_name=project_name, **variables)
+            content = apply_templating(content, variables)
             with open(target_path, 'w') as file:
                 file.write(content)
         else:
