@@ -76,7 +76,7 @@ def walkdirs_map_all_paths(template_dir, project_name):
 
     template_root = template_dir / "template"
 
-    for root, dirs, files in os.walk(template_dir):
+    for root, dirs, files in os.walk(template_root):
         rel_root = Path(root).relative_to(template_dir)
         for name in dirs + files:
             rel_path_template = rel_root / name
