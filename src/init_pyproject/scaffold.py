@@ -94,13 +94,13 @@ def walkdirs_map_all_paths(template_dir, project_name):
     template_root = template_dir / "template"
 
     for root, dirs, files in os.walk(template_root):
-        rel_root = Path(root).relative_to(template_dir)
+        rel_root = Path(root).relative_to(template_root)
         for name in dirs + files:
             rel_path_template = rel_root / name
             rel_path_target = Path(apply_templating(str(rel_path_template), {'project_name': project_name}))
             if str(rel_path_target).endswith('.template'):
                 rel_path_target = rel_path_target.with_suffix('')
-            template_paths[str(rel_path_target)] = template_dir / rel_path_template
+            template_paths[str(rel_path_target)] = template_root / rel_path_template
 
     return template_paths
 
