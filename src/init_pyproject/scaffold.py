@@ -29,7 +29,7 @@ def apply_templating(document: str, variables: dict[str, Any]) -> str:
     """
     template = Template(document)
     try:
-        return template.substitute(variables)
+        return template.safe_substitute(variables)
     except KeyError as e:
         raise ValueError(f"Missing variable for templating: {e}")
     except Exception as e:
@@ -117,6 +117,10 @@ def scaffold_project(project_name: str, template_name: str):
     variables = get_template_variable_values(template_properties)
     path_mapping = walkdirs_map_all_paths(template_dir, project_name)
     project_path = Path(project_name)
+
+    variables.update({
+        'project_name': project_name
+    })
 
     if project_path.exists():
         print(f"Project directory '{project_path}' already exists.")
