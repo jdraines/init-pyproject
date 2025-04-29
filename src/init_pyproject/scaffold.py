@@ -114,8 +114,7 @@ def scaffold_project(project_name: str, template_name: str):
         if abs_template_path.is_file():
             with open(abs_template_path, 'r') as file:
                 content = file.read()
-            for varname, value in variables.items():
-                content = content.replace(f'{{{{ {varname} }}}}', str(value))
+            content = content.format(project_name=project_name, **variables)
             with open(target_path, 'w') as file:
                 file.write(content)
         else:
