@@ -29,7 +29,7 @@ def apply_templating(document: str, variables: dict[str, Any]) -> str:
     """
     template = Template(document)
     try:
-        return template.safe_substitute(variables)
+        return template.substitute(variables)
     except KeyError as e:
         raise ValueError(f"Missing variable for templating: {e}")
     except Exception as e:
