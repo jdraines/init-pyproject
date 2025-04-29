@@ -81,6 +81,8 @@ def walkdirs_map_all_paths(template_dir, project_name):
         for name in dirs + files:
             rel_path_template = rel_root / name
             rel_path_target = Path(str(rel_path_template).format(project_name=project_name))
+            if str(rel_path_target).endswith('.template'):
+                rel_path_target = rel_path_target.with_suffix('')
             template_paths[str(rel_path_target)] = template_dir / rel_path_template
 
     return template_paths
