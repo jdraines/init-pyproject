@@ -29,7 +29,6 @@ class ScaffoldContext:
     templater: ABCTemplater = None
 
     def __post_init__(self):
-
         self.project_name = sanitize_project_name(self.project_name)
         self.project_path = self.output_dir / self.project_name
         if not self.template and self.template_name:
@@ -54,8 +53,8 @@ def apply_templating(document: str,
                      templater: ABCTemplater
                      ) -> str:
     """
-    Applies templating to the given document string using the provided variables.
-    The document can contain placeholders in the form of ${variable_name}.
+    Applies templating to the given document string using the provided variables
+    using the specified templater.
     """
     try:
         return templater.render(document, variables)
@@ -92,7 +91,7 @@ def add_project_name_variables(project_name: str, variables):
     variables['project_name_snake'] = project_name_snake
     variables['project_name_pascal'] = ''.join(word.capitalize() for word in project_name_snake.split('_'))
     variables['project_name_kebab'] = project_name.replace('_', '-')
-    variables['project_name_title'] = project_name.title()
+    variables['project_name_title'] = project_name.replace("_", " ").title()
     return variables
 
 
@@ -103,22 +102,22 @@ def get_template_variable_values(context: ScaffoldContext) -> dict[str, Any]:
         vartype = custom_var.get('type', 'str')
         caster = custom_var_type_mapper.get(vartype, str)
         default = custom_var.get('default')
-    if context.auto_use_defaults and default is not None:
-        try:
-            values[varname] = caster(default)
-        except ValueError as e:
-            print(f"Default value for {varname}, {default} cannot be used with caster {caster}: {e}")
-            sys.exit(1)
-    else:
-        defaultstr = f" [{default}]" if default else ""
-        val = input(f"Enter value for {varname} ({vartype}){defaultstr}: ")
-        if not val and default is not None:
-            val = default
-        try:
-            values[varname] = caster(val)
-        except ValueError as e:
-            print(f"Invalid value for {varname} with type {vartype} and caster {caster}: {e}")
-            sys.exit(1)
+        if context.auto_use_defaults and default is not None:
+            try:
+                values[varname] = caster(default)
+            except ValueError as e:
+                print(f"Default value for {varname}, {default} cannot be used with caster {caster}: {e}")
+                sys.exit(1)
+        else:
+            defaultstr = f" [{default}]" if default else ""
+            val = input(f"Enter value for {varname} ({vartype}){defaultstr}: ")
+            if not val and default is not None:
+                val = default
+            try:
+                values[varname] = caster(val)
+            except ValueError as e:
+                print(f"Invalid value for {varname} with type {vartype} and caster {caster}: {e}")
+                sys.exit(1)
     values = add_project_name_variables(context.project_name, values)
     return values
 
@@ -146,7 +145,7 @@ def map_paths(context: ScaffoldContext,
     """
     targets = {}
     for relpath, content in context.template.documents():
-        relpath = Path(apply_templating(relpath, variables))
+        relpath = Path(apply_templating(relpath, variables, context.templater))
         if relpath.name.endswith('.template'):
             relpath = relpath.with_suffix('')
         target_path = context.project_path / relpath
@@ -176,7 +175,8 @@ def scaffold_project(project_name: str,
         template_name=template_name,
         output_dir=output_dir,
         force=force,
-        auto_use_defaults=auto_use_defaults
+        auto_use_defaults=auto_use_defaults,
+        template=template
     )
 
     variables = get_template_variable_values(context)
@@ -200,6 +200,6 @@ def scaffold_project(project_name: str,
     for target_path, content in path_mapping.items():
         write_path = context.project_path / target_path
         write_path.parent.mkdir(parents=True, exist_ok=True)
-        content = apply_templating(content, variables)
+        content = apply_templating(content, variables, context.templater)
         with open(write_path, 'w') as file:
             file.write(content)
