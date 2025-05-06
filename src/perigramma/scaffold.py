@@ -7,7 +7,7 @@ import yaml
 from typing import Any
 
 from string import Template
-from .template_classes.base import TemplateProperties, BaseTemplate
+from .template_classes.base import BaseTemplate
 from .registry import get_template
 
 template_lib_dir = Path(__file__).parent / 'template_lib'

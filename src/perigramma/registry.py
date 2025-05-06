@@ -5,6 +5,7 @@ from .template_classes.base import BaseTemplate
 from .template_classes.filesystem_template import FilesystemTemplate
 
 
+_entry_points_group = "perigramma.template"
 template_lib_dir = Path(__file__).parent / 'template_lib'
 
 
@@ -26,7 +27,7 @@ _templates = {}
 
 
 def load_and_register_template_plugins():
-    template_entry_points = entry_points(group="templater.template")
+    template_entry_points = entry_points(group=_entry_points_group)
     for tep in template_entry_points:
         _template = tep.load()
         register_template(_template)
