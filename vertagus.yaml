@@ -1,0 +1,25 @@
+scm:
+  type: git
+  tag_prefix: v
+
+project:
+
+  rules:
+    current:
+      - not_empty
+    increment:
+      - any_increment
+
+  manifests:
+    - type: setuptools_pyproject
+      path: ./pyproject.toml
+      name: pyproject
+
+  stages:
+    prod:
+      aliases:
+        - string:latest
+        - major.minor
+      rules:
+        current:
+          - regex_mmp

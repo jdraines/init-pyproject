@@ -1,0 +1,8 @@
+name: Manual Tag Commit
+on: workflow_dispatch
+jobs:
+  tag-commit:
+    uses: ./.github/workflows/reusable.tag-commit.yml
+    permissions: write-all
+    with:
+      config_file: "./vertagus.yaml"
