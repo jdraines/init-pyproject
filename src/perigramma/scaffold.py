@@ -1,4 +1,3 @@
-# init_pyproject/scaffold.py
 import os
 import re
 import sys
@@ -56,6 +55,17 @@ def load_template_properties(template_name) -> dict:
     return properties
 
 
+def add_project_name_variables(project_name, variables):
+    """
+    Adds project name and several other derivatives (project_name_snake, project_name_pascal, project_name_kebab)"""
+    variables['project_name'] = project_name
+    project_name_snake = re.sub(r'(?<!^)(?=[A-Z])', '_', project_name).lower()
+    variables['project_name_snake'] = project_name_snake
+    variables['project_name_pascal'] = ''.join(word.capitalize() for word in project_name_snake.split('_'))
+    variables['project_name_kebab'] = project_name.replace('_', '-')
+    return variables
+
+
 def get_template_variable_values(project_name, template_properties, auto_use_defaults=True) -> dict[str, Any]:
     values = {}
     for custom_var in template_properties.get('custom_variables', []):
@@ -79,7 +89,7 @@ def get_template_variable_values(project_name, template_properties, auto_use_def
         except ValueError as e:
             print(f"Invalid value for {varname} with type {vartype} and caster {caster}: {e}")
             sys.exit(1)
-    values.update({"project_name": project_name})
+    values = add_project_name_variables(project_name, values)
     return values
 
 
