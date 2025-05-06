@@ -4,13 +4,14 @@ from pathlib import Path
 from .scaffold import scaffold_project
 from argparse import ArgumentParser
 from .template_classes.filesystem_template import FilesystemTemplate
-
+from .template_classes.git_template import GitTemplate
 
 def get_args():
     parser = ArgumentParser(description="Run the templater to build out a project file structure from templates.")
     parser.add_argument("name", help="The name of the project to create.")
     parser.add_argument("-t", "--template", default=None, help="Name of the project template to use.")
     parser.add_argument("-p", "--path", default=None, help="Path to a template directory.")
+    parser.add_argument("-g", "--git", default=None, help="URI of a git repo to be used as a template directory.")
     parser.add_argument("-o", "--output", help="Output directory for the project.", default=os.getcwd())
     parser.add_argument("-f", "--force", action="store_true", help="Force overwrite existing files.")
     parser.add_argument("--auto-use-defaults", action="store_true", help="Automatically use default values for template variables if present. (Overrides the template properties field of the same name.)")
@@ -21,7 +22,7 @@ def get_args():
     return args
 
 
-def get_template(template_path) -> FilesystemTemplate:
+def get_filesystem_template(template_path) -> FilesystemTemplate:
     """
     Get a template from the filesystem.
     """
@@ -31,6 +32,14 @@ def get_template(template_path) -> FilesystemTemplate:
         return template
     else:
         raise ValueError(f"Template path '{template_path}' is not a valid directory.")
+
+
+def get_git_template(git_uri) -> GitTemplate:
+    """
+    Get a template from a git repository.
+    """
+    template_name = Path(git_uri).name
+    return GitTemplate(template_name, git_uri)
 
 
 def main():
@@ -43,7 +52,10 @@ def main():
 
     template = None
     if template_path:
-        template = get_template(template_path)
+        template = get_filesystem_template(template_path)
+        template_name = template.template_name
+    elif args.git:
+        template = get_git_template(args.git)
         template_name = template.template_name
 
     try:
