@@ -3,11 +3,11 @@ requires = ["setuptools>=42", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "init-pyproject"
+name = "templater"
 version = "0.1.0"
 description = "A tool to scaffold a Python project with a pyproject.toml file"
 readme = "README.md"
-requires-python = ">=3.6"
+requires-python = ">=3.10"
 authors = [
     { name = "Your Name", email = "your.email@example.com" }
 ]
@@ -24,3 +24,6 @@ init-pyproject = "init_pyproject.cli:main"
 
 [tool.setuptools.package-data]
 init_pyproject = ["templates/*.toml"]
+
+[project.entry-points."templater.template"]
+none = "templater.template_classes._none:none_template"

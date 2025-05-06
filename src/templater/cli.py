@@ -1,0 +1,53 @@
+import sys
+import os
+from pathlib import Path
+from .scaffold import scaffold_project
+from argparse import ArgumentParser
+from .template_classes.filesystem_template import FilesystemTemplate
+
+
+def get_args():
+    parser = ArgumentParser(description="Run the templater to build out a project file structure from templates.")
+    parser.add_argument("name", help="The name of the project to create.")
+    parser.add_argument("-t", "--template", default=None, help="Name of the project template to use.")
+    parser.add_argument("-p", "--path", default=None, help="Path to a template directory.")
+    parser.add_argument("-o", "--output", help="Output directory for the project.", default=os.getcwd())
+    parser.add_argument("-f", "--force", action="store_true", help="Force overwrite existing files.")
+    return parser.parse_args()
+
+
+def get_template(template_path) -> FilesystemTemplate:
+    """
+    Get a template from the filesystem.
+    """
+    if os.path.isdir(template_path):
+        template_name = Path(template_path).stem
+        template = FilesystemTemplate(template_name, template_path)
+        return template
+    else:
+        raise ValueError(f"Template path '{template_path}' is not a valid directory.")
+
+
+def main():
+    args = get_args()
+    project_name = args.name
+    template_name = args.template
+    output_dir = args.output
+    force = args.force
+    template_path = args.path
+
+    if template_path:
+        template = get_template(template_path)
+
+    try:
+        scaffold_project(
+            proejct_name=project_name,
+            template_name=template_name,
+            output_dir=output_dir,
+            force=force,
+            template=template
+            )
+        print(f"Project '{project_name}' initialized successfully using the '{template_name}' template.")
+    except Exception as e:
+        print(f"An error occurred while initializing the project: {e}")
+        sys.exit(1)

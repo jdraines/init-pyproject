@@ -1,0 +1,4 @@
+from .registry import load_and_register_template_plugins, load_and_register_packaged_templates
+
+load_and_register_packaged_templates()
+load_and_register_template_plugins()

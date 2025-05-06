@@ -7,7 +7,8 @@ import yaml
 from typing import Any
 
 from string import Template
-
+from .template_classes.base import TemplateProperties, BaseTemplate
+from .registry import get_template
 
 template_lib_dir = Path(__file__).parent / 'template_lib'
 TEMPLATE_PROPERTIES_FILENAME = 'template_properties.yaml'
@@ -55,18 +56,26 @@ def load_template_properties(template_name) -> dict:
     return properties
 
 
-def get_template_variable_values(template_properties) -> dict[str, Any]:
+def get_template_variable_values(project_name, template_properties) -> dict[str, Any]:
     values = {}
     for custom_var in template_properties.get('custom_variables', []):
         varname = custom_var['name']
         vartype = custom_var.get('type', 'str')
         caster = custom_var_type_mapper.get(vartype, str)
-        val = input(f"Enter value for {varname} ({vartype}): ")
-        try:
-            values[varname] = caster(val)
-        except ValueError as e:
-            print(f"Invalid value for {varname}: {e}")
-            sys.exit(1)
+        if (val := custom_var.get('default')) is not None:
+            try:
+                values[varname] = caster(val)
+            except ValueError as e:
+                print(f"Default value for {varname}, {val} cannot be used with caster {caster}: {e}")
+                sys.exit(1)
+        else:
+            val = input(f"Enter value for {varname} ({vartype}): ")
+            try:
+                values[varname] = caster(val)
+            except ValueError as e:
+                print(f"Invalid value for {varname} with type {vartype} and caster {caster}: {e}")
+                sys.exit(1)
+    values.update({"project_name": project_name})
     return values
 
 
@@ -83,62 +92,56 @@ def sanitize_project_name(name: str) -> str:
     return sanitized
 
 
-def walkdirs_map_all_paths(template_dir, project_name):
+def map_paths(template: BaseTemplate, project_dir: Path, variables: dict[str, Any]) -> dict[Path, str]:
     """
-    Walk all the files and dires in the template directory and put the relative
-    path in a list of current_dir_paths. Create a dictionary that maps
-    the relative current_dir_paths to their absolute template paths.
+    Using the `template.documents` iterator method, get the `relpath, content` pairs
+    and create a new `target_path, content` mapping. Perform templating on the template
+    relpath using the provided variables.
     """
-    template_paths = {}
-
-    template_root = template_dir / "template"
-
-    for root, dirs, files in os.walk(template_root):
-        rel_root = Path(root).relative_to(template_root)
-        for name in dirs + files:
-            rel_path_template = rel_root / name
-            rel_path_target = Path(apply_templating(str(rel_path_template), {'project_name': project_name}))
-            if str(rel_path_target).endswith('.template'):
-                rel_path_target = rel_path_target.with_suffix('')
-            template_paths[str(rel_path_target)] = template_root / rel_path_template
-
-    return template_paths
+    targets = {}
+    for relpath, content in template.documents():
+        relpath = Path(apply_templating(relpath, variables))
+        target_path = project_dir / relpath
+        target_path.parent.mkdir(parents=True, exist_ok=True)
+        targets[relpath] = content
+    return targets
 
 
-def scaffold_project(project_name: str, template_name: str):
+def scaffold_project(project_name: str,
+                     template_name: str = None,
+                     output_dir: str = None,
+                     force: bool = False,
+                     template: BaseTemplate = None,
+                     ) -> None:
     """
     Scaffold a new project based on the provided template and variables.
     Copies files from the template directory to the new project directory,
     replacing placeholders with the provided variable values.
-    """
+    """    
+    if output_dir is None:
+        output_dir = os.getcwd()
+    output_dir = Path(output_dir)
+    project_path: Path = output_dir / project_name
     project_name = sanitize_project_name(project_name)
-    template_dir = get_template_dir(template_name)
-    template_properties = load_template_properties(template_name)
-    variables = get_template_variable_values(template_properties)
-    path_mapping = walkdirs_map_all_paths(template_dir, project_name)
-    project_path = Path(project_name)
+    
+    if not template and template_name:
+        template = get_template(template_name)
+    else:
+        raise ValueError("Either template or template_name must be provided.")
 
-    variables.update({
-        'project_name': project_name
-    })
+    template_properties = template.properties
+    variables = get_template_variable_values(project_name, template_properties)
+    path_mapping: dict[Path, str] = map_paths(template, project_path)
 
-    if project_path.exists():
-        print(f"Project directory '{project_path}' already exists.")
-        sys.exit(1)
+    if not force:
+        if project_path.exists() and project_path.is_dir() and os.listdir(project_path):
+            print(f"Project directory '{project_path}' already exists. Set --force to overwrite.")
+            sys.exit(1)
 
     project_path.mkdir(parents=True, exist_ok=True)
 
-    for rel_path, abs_template_path in path_mapping.items():
-        target_path = project_path / rel_path
+    for target_path, content in path_mapping.items():
         target_path.parent.mkdir(parents=True, exist_ok=True)
-
-        if abs_template_path.is_file():
-            with open(abs_template_path, 'r') as file:
-                content = file.read()
-            content = apply_templating(content, variables)
-            with open(target_path, 'w') as file:
-                file.write(content)
-        else:
-            target_path.mkdir(parents=True, exist_ok=True)
-
-    print(f"Project '{project_name}' scaffolded successfully at {project_path}.")
+        content = apply_templating(content, variables)
+        with open(target_path, 'w') as file:
+            file.write(content)
