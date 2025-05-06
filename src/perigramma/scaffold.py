@@ -4,13 +4,40 @@ import sys
 from pathlib import Path
 import yaml
 from typing import Any
+from dataclasses import dataclass, field
 
 from string import Template
 from .template_classes.base import BaseTemplate
 from .registry import get_template
+from .templaters.base import ABCTemplater
+from .templaters.registry import get_templater
 
 template_lib_dir = Path(__file__).parent / 'template_lib'
 TEMPLATE_PROPERTIES_FILENAME = 'template_properties.yaml'
+DEFAULT_TEMPLATER = os.environ.get('PERIGRAMMA_TEMPLATER', 'jinja2')
+
+
+@dataclass
+class ScaffoldContext:
+    project_name: str
+    template_name: str
+    output_dir: Path
+    force: bool = False
+    auto_use_defaults: bool = True
+    project_path: Path = None
+    template: BaseTemplate = None
+    templater: ABCTemplater = None
+
+    def __post_init__(self):
+
+        self.project_name = sanitize_project_name(self.project_name)
+        self.project_path = self.output_dir / self.project_name
+        if not self.template and self.template_name:
+            self.template = get_template(self.template_name)
+        elif not self.template:
+            raise ValueError("Either template or template_name must be provided.")
+        self.templater = get_templater(self.template.properties.get('templater', DEFAULT_TEMPLATER))
+
 
 custom_var_type_mapper = {
     'str': str,
@@ -22,14 +49,16 @@ custom_var_type_mapper = {
 }
 
 
-def apply_templating(document: str, variables: dict[str, Any]) -> str:
+def apply_templating(document: str,
+                     variables: dict[str, Any],
+                     templater: ABCTemplater
+                     ) -> str:
     """
     Applies templating to the given document string using the provided variables.
     The document can contain placeholders in the form of ${variable_name}.
     """
-    template = Template(document)
     try:
-        return template.safe_substitute(variables)
+        return templater.render(document, variables)
     except KeyError as e:
         raise ValueError(f"Missing variable for templating: {e}")
     except Exception as e:
@@ -55,7 +84,7 @@ def load_template_properties(template_name) -> dict:
     return properties
 
 
-def add_project_name_variables(project_name, variables):
+def add_project_name_variables(project_name: str, variables):
     """
     Adds project name and several other derivatives (project_name_snake, project_name_pascal, project_name_kebab)"""
     variables['project_name'] = project_name
@@ -63,17 +92,18 @@ def add_project_name_variables(project_name, variables):
     variables['project_name_snake'] = project_name_snake
     variables['project_name_pascal'] = ''.join(word.capitalize() for word in project_name_snake.split('_'))
     variables['project_name_kebab'] = project_name.replace('_', '-')
+    variables['project_name_title'] = project_name.title()
     return variables
 
 
-def get_template_variable_values(project_name, template_properties, auto_use_defaults=True) -> dict[str, Any]:
+def get_template_variable_values(context: ScaffoldContext) -> dict[str, Any]:
     values = {}
-    for custom_var in template_properties.get('custom_variables', []):
+    for custom_var in context.template.custom_variables:
         varname = custom_var['name']
         vartype = custom_var.get('type', 'str')
         caster = custom_var_type_mapper.get(vartype, str)
         default = custom_var.get('default')
-    if auto_use_defaults and default is not None:
+    if context.auto_use_defaults and default is not None:
         try:
             values[varname] = caster(default)
         except ValueError as e:
@@ -89,7 +119,7 @@ def get_template_variable_values(project_name, template_properties, auto_use_def
         except ValueError as e:
             print(f"Invalid value for {varname} with type {vartype} and caster {caster}: {e}")
             sys.exit(1)
-    values = add_project_name_variables(project_name, values)
+    values = add_project_name_variables(context.project_name, values)
     return values
 
 
@@ -106,18 +136,20 @@ def sanitize_project_name(name: str) -> str:
     return sanitized
 
 
-def map_paths(template: BaseTemplate, project_dir: Path, variables: dict[str, Any]) -> dict[Path, str]:
+def map_paths(context: ScaffoldContext,
+              variables: dict[str, Any]
+              ) -> dict[Path, str]:
     """
     Using the `template.documents` iterator method, get the `relpath, content` pairs
     and create a new `target_path, content` mapping. Perform templating on the template
     relpath using the provided variables.
     """
     targets = {}
-    for relpath, content in template.documents():
+    for relpath, content in context.template.documents():
         relpath = Path(apply_templating(relpath, variables))
         if relpath.name.endswith('.template'):
             relpath = relpath.with_suffix('')
-        target_path = project_dir / relpath
+        target_path = context.project_path / relpath
         target_path.parent.mkdir(parents=True, exist_ok=True)
         targets[relpath] = content
     return targets
@@ -134,31 +166,39 @@ def scaffold_project(project_name: str,
     Scaffold a new project based on the provided template and variables.
     Copies files from the template directory to the new project directory,
     replacing placeholders with the provided variable values.
-    """    
+    """
     if output_dir is None:
         output_dir = os.getcwd()
     output_dir = Path(output_dir)
-    project_path: Path = output_dir / project_name
-    project_name = sanitize_project_name(project_name)
-    
-    if not template and template_name:
-        template = get_template(template_name)
-    elif not template:
-        raise ValueError("Either template or template_name must be provided.")
 
-    template_properties = template.properties
-    variables = get_template_variable_values(project_name, template_properties, auto_use_defaults)
-    path_mapping: dict[Path, str] = map_paths(template, project_path, variables)
+    context = ScaffoldContext(
+        project_name=project_name,
+        template_name=template_name,
+        output_dir=output_dir,
+        force=force,
+        auto_use_defaults=auto_use_defaults
+    )
 
-    if not force:
-        if project_path.exists() and project_path.is_dir() and os.listdir(project_path):
-            print(f"Project directory '{project_path}' already exists. Set --force to overwrite.")
+    variables = get_template_variable_values(context)
+
+    path_mapping: dict[Path, str] = map_paths(
+        context,
+        variables
+    )
+
+    if not context.force:
+        if all([
+            context.project_path.exists(),
+            context.project_path.is_dir(),
+            os.listdir(context.project_path)
+        ]):
+            print(f"Project directory '{context.project_path}' already exists. Set --force to overwrite.")
             sys.exit(1)
 
-    project_path.mkdir(parents=True, exist_ok=True)
+    context.project_path.mkdir(parents=True, exist_ok=True)
 
     for target_path, content in path_mapping.items():
-        write_path = project_path / target_path
+        write_path = context.project_path / target_path
         write_path.parent.mkdir(parents=True, exist_ok=True)
         content = apply_templating(content, variables)
         with open(write_path, 'w') as file:

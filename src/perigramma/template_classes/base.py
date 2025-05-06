@@ -1,16 +1,7 @@
 from abc import ABC, abstractmethod
-from typing import Any, Generator, TypedDict
+from typing import Generator
 
-
-class CustomVariable(TypedDict):
-    name: str
-    type: str | None
-    default: Any | None
-    description: str | None
-
-
-class TemplateProperties(TypedDict):
-    custom_variables: list[CustomVariable] | None
+from ..properties import TemplateProperties
 
 
 class ABCTemplate(ABC):
@@ -36,7 +27,7 @@ class BaseTemplate(ABCTemplate):
         Initializes the template with the given name and properties.
         """
         self.template_name = template_name
-        self.properties = properties
+        self.properties = properties or {}
 
     @property
     def custom_variables(self) -> list[str]:
@@ -44,11 +35,3 @@ class BaseTemplate(ABCTemplate):
         Returns a list of custom variable names defined in the template properties.
         """
         return self.properties.get('custom_variables', [])
-    
-    @property
-    def defaults(self) -> dict[str, Any]:
-        """
-        Returns a dictionary of default values defined in the template properties.
-        """
-        return self.properties.get('defaults', {})
-    
