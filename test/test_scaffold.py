@@ -3,6 +3,7 @@ import pytest
 import sys
 from pathlib import Path
 from unittest.mock import patch, MagicMock, mock_open
+from copy import copy
 
 from perigramma.scaffold import (
     sanitize_project_name,
@@ -224,7 +225,58 @@ class TestScaffoldContext:
                 output_dir=temp_dir,
                 template=None
             )
+    
+    def test_scaffold_context_with_auto_use_default_values(self, filesystem_template, temp_dir):
+        filesystem_template = copy(filesystem_template)
+        filesystem_template.properties = copy(filesystem_template.properties)
 
+        context = ScaffoldContext(
+            project_name="test_project",
+            template_name="test_template",
+            output_dir=temp_dir,
+            template=filesystem_template,
+            auto_use_defaults=True
+        )
+        assert context.auto_use_defaults is True
+
+        context = ScaffoldContext(
+            project_name="test_project",
+            template_name="test_template",
+            output_dir=temp_dir,
+            template=filesystem_template,
+            auto_use_defaults=False
+        )
+        assert context.auto_use_defaults is False
+
+        context = ScaffoldContext(
+            project_name="test_project",
+            template_name="test_template",
+            output_dir=temp_dir,
+            template=filesystem_template,
+            auto_use_defaults=None
+        ) 
+        assert context.auto_use_defaults is True
+
+        filesystem_template.properties["auto_use_defaults"] = False
+        assert filesystem_template.properties["auto_use_defaults"] is False
+        context = ScaffoldContext(
+            project_name="test_project",
+            template_name="test_template",
+            output_dir=temp_dir,
+            template=filesystem_template,
+            auto_use_defaults=None
+        ) 
+        assert context.auto_use_defaults is False
+
+        filesystem_template.properties.pop("auto_use_defaults")
+        context = ScaffoldContext(
+            project_name="test_project",
+            template_name="test_template",
+            output_dir=temp_dir,
+            template=filesystem_template,
+            auto_use_defaults=None
+        ) 
+        assert context.auto_use_defaults is False
 
 class TestMapPaths:
     def test_map_paths_basic(self, filesystem_template, temp_dir):
@@ -240,8 +292,8 @@ class TestMapPaths:
         
         # Check that the expected files are in the mapping
         paths = list(path_mapping.keys())
-        assert Path("pyproject.toml") in paths  # .template suffix removed
-        assert Path("README.md") in paths  # .template suffix removed
+        assert Path("pyproject.toml.jinja") in paths
+        assert Path("README.md.jinja") in paths
         assert Path("src/test_project/__init__.py") in paths  # project_name substituted
         assert Path("src/test_project/main.py") in paths  # project_name substituted
 
@@ -357,7 +409,7 @@ class TestScaffoldProject:
         mock_exists.return_value = False
         mock_listdir.return_value = []
         
-        mock_apply_templating.side_effect = lambda c, v, t: c + '_templated'
+        mock_apply_templating.side_effect = lambda c, v, t, f: c + '_templated'
         
         # Call function
         scaffold_project(

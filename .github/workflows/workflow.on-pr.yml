@@ -1,0 +1,17 @@
+name: Quickparser PR workflow
+on:
+  pull_request:
+    branches:
+      - master
+    paths:
+      - "src/**"
+      - "pyproject.toml"
+      - "vertagus.toml"
+
+jobs:
+  check-version:
+    uses: ./.github/workflows/reusable.check-version.yml
+    with:
+      config_file: "./vertagus.yaml"
+  run-tests:
+    uses: ./.github/workflows/reusable.run-tests.yml

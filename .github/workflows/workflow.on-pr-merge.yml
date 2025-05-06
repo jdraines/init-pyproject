@@ -1,0 +1,43 @@
+name: Quickparser PR merge workflow
+on:
+  pull_request:
+    types:
+      - closed
+    branches:
+      - master
+    paths:
+      - "src/**"
+      - "pyproject.toml"
+      - "vertagus.toml"
+
+jobs:
+  tag-commit:
+    uses: ./.github/workflows/reusable.tag-commit.yml
+    if: github.event.pull_request.merged == true
+    permissions: write-all
+    with:
+      config_file: "./vertagus.yaml"
+
+  publish-to-pypi:
+    name: Upload release to PyPI
+    if: ${{ startsWith( github.head_ref, 'release/' ) }}
+    runs-on: ubuntu-latest
+    environment:
+      name: pypi
+      url: https://pypi.org/p/perigramma
+    permissions:
+      id-token: write 
+    steps:
+    - name: checkout repo content
+      uses: actions/checkout@v4
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.x'
+    - name: Build package
+      run: |
+        python3 -m pip install --upgrade build
+        ls -al
+        python3 -m build
+    - name: Publish package distributions to PyPI
+      uses: pypa/gh-action-pypi-publish@release/v1

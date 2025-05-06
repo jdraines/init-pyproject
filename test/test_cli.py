@@ -3,7 +3,7 @@ import os
 from unittest.mock import patch, MagicMock
 import sys
 from pathlib import Path
-from perigramma.cli import get_args, get_template, main
+from perigramma.cli import get_args, get_filesystem_template, main
 
 
 class TestCliArgs:
@@ -20,6 +20,7 @@ class TestCliArgs:
         mock_args.confirm_defaults = True
         mock_args.debug = False
         mock_parse_args.return_value = mock_args
+        mock_args.git = None
         
         # Call function
         args = get_args()
@@ -45,7 +46,7 @@ class TestGetTemplate:
         mock_template_class.return_value = mock_template
         
         # Call function
-        template = get_template('/path/to/test_template')
+        template = get_filesystem_template('/path/to/test_template')
         
         # Verify results
         mock_isdir.assert_called_once_with('/path/to/test_template')
@@ -59,7 +60,7 @@ class TestGetTemplate:
         
         # Call function and verify exception
         with pytest.raises(ValueError) as excinfo:
-            get_template('/invalid/path')
+            get_filesystem_template('/invalid/path')
         
         # Verify error message
         assert "Template path '/invalid/path' is not a valid directory" in str(excinfo.value)
@@ -68,7 +69,7 @@ class TestGetTemplate:
 class TestMain:
     
     @patch('perigramma.cli.get_args')
-    @patch('perigramma.cli.get_template')
+    @patch('perigramma.cli.get_filesystem_template')
     @patch('perigramma.cli.scaffold_project')
     def test_main_success(self, mock_scaffold, mock_get_template, mock_get_args):
         # Setup mocks
@@ -78,9 +79,10 @@ class TestMain:
         mock_args.output = '/test/output'
         mock_args.force = False
         mock_args.path = None
-        mock_args.confirm_defaults = False
+        mock_args.auto_use_defaults = None
         mock_args.debug = False
         mock_get_args.return_value = mock_args
+        mock_args.git = None
         
         # Call function
         with patch('builtins.print') as mock_print:
@@ -93,14 +95,14 @@ class TestMain:
             output_dir='/test/output',
             force=False,
             template=None,
-            auto_use_defaults=True
+            auto_use_defaults=None
         )
         mock_print.assert_called_once_with(
             "Project 'test_project' initialized successfully using the 'test_template' template."
         )
     
     @patch('perigramma.cli.get_args')
-    @patch('perigramma.cli.get_template')
+    @patch('perigramma.cli.get_filesystem_template')
     @patch('perigramma.cli.scaffold_project')
     def test_main_with_template_path(self, mock_scaffold, mock_get_template, mock_get_args):
         # Setup mocks
@@ -110,8 +112,9 @@ class TestMain:
         mock_args.output = '/test/output'
         mock_args.force = False
         mock_args.path = '/path/to/template'
-        mock_args.confirm_defaults = True
+        mock_args.auto_use_defaults = True
         mock_args.debug = False
+        mock_args.git = None
         mock_get_args.return_value = mock_args
         
         mock_template = MagicMock()
@@ -130,7 +133,7 @@ class TestMain:
             output_dir='/test/output',
             force=False,
             template=mock_template,
-            auto_use_defaults=False
+            auto_use_defaults=True
         )
         mock_print.assert_called_once_with(
             "Project 'test_project' initialized successfully using the 'custom_template' template."
@@ -149,6 +152,7 @@ class TestMain:
         mock_args.confirm_defaults = False
         mock_args.debug = False
         mock_get_args.return_value = mock_args
+        mock_args.git = None
         
         mock_scaffold.side_effect = ValueError("Test error")
         
@@ -176,6 +180,7 @@ class TestMain:
         mock_args.confirm_defaults = False
         mock_args.debug = True
         mock_get_args.return_value = mock_args
+        mock_args.git = None
         
         mock_scaffold.side_effect = ValueError("Test error")
         
