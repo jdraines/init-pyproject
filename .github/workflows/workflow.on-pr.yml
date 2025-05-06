@@ -2,7 +2,7 @@ name: Quickparser PR workflow
 on:
   pull_request:
     branches:
-      - master
+      - main
     paths:
       - "src/**"
       - "pyproject.toml"
