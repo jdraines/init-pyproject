@@ -19,18 +19,19 @@ class FilesystemTemplate(BaseTemplate):
         self.template_name = template_name
 
     def _load_properties(self) -> TemplateProperties:
-        properties_filename = self.template_dir / self.template_properties_filename
+        properties_filename = Path(self.template_dir) / Path(self.template_properties_filename)
         if not os.path.exists(properties_filename):
             raise FileNotFoundError(f"Template properties file '{properties_filename}' does not exist.")
         with open(properties_filename, 'r') as file:
             properties = yaml.safe_load(file)
+        properties = properties or {}
         return properties
 
     def documents(self) -> Generator[tuple[str, str], None, None]:
         """
         Yields tuples of (relpath, content) for each document in the template.
         """
-        template_root = self.template_dir / "template"
+        template_root = Path(self.template_dir) / "template"
         if not os.path.exists(template_root):
             raise FileNotFoundError(f"Template root directory '{template_root}' does not exist.")
         for root, dirs, files in os.walk(template_root):

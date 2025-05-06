@@ -56,25 +56,29 @@ def load_template_properties(template_name) -> dict:
     return properties
 
 
-def get_template_variable_values(project_name, template_properties) -> dict[str, Any]:
+def get_template_variable_values(project_name, template_properties, auto_use_defaults=True) -> dict[str, Any]:
     values = {}
     for custom_var in template_properties.get('custom_variables', []):
         varname = custom_var['name']
         vartype = custom_var.get('type', 'str')
         caster = custom_var_type_mapper.get(vartype, str)
-        if (val := custom_var.get('default')) is not None:
-            try:
-                values[varname] = caster(val)
-            except ValueError as e:
-                print(f"Default value for {varname}, {val} cannot be used with caster {caster}: {e}")
-                sys.exit(1)
-        else:
-            val = input(f"Enter value for {varname} ({vartype}): ")
-            try:
-                values[varname] = caster(val)
-            except ValueError as e:
-                print(f"Invalid value for {varname} with type {vartype} and caster {caster}: {e}")
-                sys.exit(1)
+        default = custom_var.get('default')
+    if auto_use_defaults and default is not None:
+        try:
+            values[varname] = caster(default)
+        except ValueError as e:
+            print(f"Default value for {varname}, {default} cannot be used with caster {caster}: {e}")
+            sys.exit(1)
+    else:
+        defaultstr = f" [{default}]" if default else ""
+        val = input(f"Enter value for {varname} ({vartype}){defaultstr}: ")
+        if not val and default is not None:
+            val = default
+        try:
+            values[varname] = caster(val)
+        except ValueError as e:
+            print(f"Invalid value for {varname} with type {vartype} and caster {caster}: {e}")
+            sys.exit(1)
     values.update({"project_name": project_name})
     return values
 
@@ -101,6 +105,8 @@ def map_paths(template: BaseTemplate, project_dir: Path, variables: dict[str, An
     targets = {}
     for relpath, content in template.documents():
         relpath = Path(apply_templating(relpath, variables))
+        if relpath.name.endswith('.template'):
+            relpath = relpath.with_suffix('')
         target_path = project_dir / relpath
         target_path.parent.mkdir(parents=True, exist_ok=True)
         targets[relpath] = content
@@ -112,6 +118,7 @@ def scaffold_project(project_name: str,
                      output_dir: str = None,
                      force: bool = False,
                      template: BaseTemplate = None,
+                     auto_use_defaults: bool = True,
                      ) -> None:
     """
     Scaffold a new project based on the provided template and variables.
@@ -126,12 +133,12 @@ def scaffold_project(project_name: str,
     
     if not template and template_name:
         template = get_template(template_name)
-    else:
+    elif not template:
         raise ValueError("Either template or template_name must be provided.")
 
     template_properties = template.properties
-    variables = get_template_variable_values(project_name, template_properties)
-    path_mapping: dict[Path, str] = map_paths(template, project_path)
+    variables = get_template_variable_values(project_name, template_properties, auto_use_defaults)
+    path_mapping: dict[Path, str] = map_paths(template, project_path, variables)
 
     if not force:
         if project_path.exists() and project_path.is_dir() and os.listdir(project_path):
@@ -141,7 +148,8 @@ def scaffold_project(project_name: str,
     project_path.mkdir(parents=True, exist_ok=True)
 
     for target_path, content in path_mapping.items():
-        target_path.parent.mkdir(parents=True, exist_ok=True)
+        write_path = project_path / target_path
+        write_path.parent.mkdir(parents=True, exist_ok=True)
         content = apply_templating(content, variables)
-        with open(target_path, 'w') as file:
+        with open(write_path, 'w') as file:
             file.write(content)

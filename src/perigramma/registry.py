@@ -53,10 +53,14 @@ def register_template(template: BaseTemplate):
     Registers a template class with the registry.
     The template class must inherit from BaseTemplate.
     """
-    if not issubclass(template, BaseTemplate):
+
+    if not isinstance(template, BaseTemplate):
         raise RegisterTemplateError("Template must be a subclass of BaseTemplate.")
     
     template_name = template.template_name
+    if template_name == "none":
+        return
+
     if template_name in _templates:
         raise RegisterTemplateError(f"Template '{template_name}' is already registered.")
     

@@ -13,6 +13,8 @@ def get_args():
     parser.add_argument("-p", "--path", default=None, help="Path to a template directory.")
     parser.add_argument("-o", "--output", help="Output directory for the project.", default=os.getcwd())
     parser.add_argument("-f", "--force", action="store_true", help="Force overwrite existing files.")
+    parser.add_argument("--confirm-defaults", action="store_true", help="Confirm using default values for template variables.")
+    parser.add_argument("--debug", action="store_true", help="Enable debug mode.")
     return parser.parse_args()
 
 
@@ -21,7 +23,7 @@ def get_template(template_path) -> FilesystemTemplate:
     Get a template from the filesystem.
     """
     if os.path.isdir(template_path):
-        template_name = Path(template_path).stem
+        template_name = Path(template_path).name
         template = FilesystemTemplate(template_name, template_path)
         return template
     else:
@@ -36,18 +38,24 @@ def main():
     force = args.force
     template_path = args.path
 
+    template = None
     if template_path:
         template = get_template(template_path)
+        template_name = template.template_name
 
     try:
         scaffold_project(
-            proejct_name=project_name,
+            project_name=project_name,
             template_name=template_name,
             output_dir=output_dir,
             force=force,
-            template=template
+            template=template,
+            auto_use_defaults=not args.confirm_defaults,
             )
         print(f"Project '{project_name}' initialized successfully using the '{template_name}' template.")
     except Exception as e:
-        print(f"An error occurred while initializing the project: {e}")
+        if args.debug:
+            raise
+        etype = type(e).__name__
+        print(f"An error occurred while initializing the project: {etype}: {e}")
         sys.exit(1)
