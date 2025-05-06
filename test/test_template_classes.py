@@ -42,14 +42,14 @@ class TestFilesystemTemplate:
         
         # Check that all expected files are included
         paths = [rel_path for rel_path, _ in documents]
-        assert "pyproject.toml.template" in paths
-        assert "README.md.template" in paths
+        assert "pyproject.toml.jinja" in paths
+        assert "README.md.jinja" in paths
         assert "src/{{ project_name }}/__init__.py" in paths
         assert "src/{{ project_name }}/main.py" in paths
         
         # Check content of a specific file
         for rel_path, content in documents:
-            if rel_path == "README.md.template":
+            if rel_path == "README.md.jinja":
                 assert "# {{ project_name }}" in content
                 assert "A project by {{ author }}." in content
     

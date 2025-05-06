@@ -5,7 +5,9 @@ from .base import ABCTemplater
 
 class PystringTemplater(ABCTemplater):
 
-    def render(self, template: str, context: dict) -> str:
+    suffix = ".template"
+
+    def render(self, template: str, context: dict, template_filename: str = None) -> str:
         """
         Render a template with the given context using Python string templating.
 
@@ -16,5 +18,8 @@ class PystringTemplater(ABCTemplater):
         Returns:
             str: The rendered template.
         """
+        if template_filename:
+            if not template_filename.endswith(self.suffix):
+                return template
         pystring_template = Template(template)
         return pystring_template.safe_substitute(context)

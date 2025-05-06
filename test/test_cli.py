@@ -78,7 +78,7 @@ class TestMain:
         mock_args.output = '/test/output'
         mock_args.force = False
         mock_args.path = None
-        mock_args.confirm_defaults = False
+        mock_args.auto_use_defaults = None
         mock_args.debug = False
         mock_get_args.return_value = mock_args
         
@@ -93,7 +93,7 @@ class TestMain:
             output_dir='/test/output',
             force=False,
             template=None,
-            auto_use_defaults=True
+            auto_use_defaults=None
         )
         mock_print.assert_called_once_with(
             "Project 'test_project' initialized successfully using the 'test_template' template."
@@ -110,7 +110,7 @@ class TestMain:
         mock_args.output = '/test/output'
         mock_args.force = False
         mock_args.path = '/path/to/template'
-        mock_args.confirm_defaults = True
+        mock_args.auto_use_defaults = True
         mock_args.debug = False
         mock_get_args.return_value = mock_args
         
@@ -130,7 +130,7 @@ class TestMain:
             output_dir='/test/output',
             force=False,
             template=mock_template,
-            auto_use_defaults=False
+            auto_use_defaults=True
         )
         mock_print.assert_called_once_with(
             "Project 'test_project' initialized successfully using the 'custom_template' template."

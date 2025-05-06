@@ -23,7 +23,7 @@ class ScaffoldContext:
     template_name: str
     output_dir: Path
     force: bool = False
-    auto_use_defaults: bool = True
+    auto_use_defaults: bool | None = None
     project_path: Path = None
     template: BaseTemplate = None
     templater: ABCTemplater = None
@@ -36,6 +36,8 @@ class ScaffoldContext:
         elif not self.template:
             raise ValueError("Either template or template_name must be provided.")
         self.templater = get_templater(self.template.properties.get('templater', DEFAULT_TEMPLATER))
+        if self.auto_use_defaults is None:
+            self.auto_use_defaults = self.template.properties.get('auto_use_defaults', False)
 
 
 custom_var_type_mapper = {
@@ -50,14 +52,15 @@ custom_var_type_mapper = {
 
 def apply_templating(document: str,
                      variables: dict[str, Any],
-                     templater: ABCTemplater
+                     templater: ABCTemplater,
+                     document_filename: str = None
                      ) -> str:
     """
     Applies templating to the given document string using the provided variables
     using the specified templater.
     """
     try:
-        return templater.render(document, variables)
+        return templater.render(document, variables, template_filename=document_filename)
     except KeyError as e:
         raise ValueError(f"Missing variable for templating: {e}")
     except Exception as e:
@@ -146,8 +149,6 @@ def map_paths(context: ScaffoldContext,
     targets = {}
     for relpath, content in context.template.documents():
         relpath = Path(apply_templating(relpath, variables, context.templater))
-        if relpath.name.endswith('.template'):
-            relpath = relpath.with_suffix('')
         target_path = context.project_path / relpath
         target_path.parent.mkdir(parents=True, exist_ok=True)
         targets[relpath] = content
@@ -198,8 +199,16 @@ def scaffold_project(project_name: str,
     context.project_path.mkdir(parents=True, exist_ok=True)
 
     for target_path, content in path_mapping.items():
+        target_filename = target_path.name
+        content = apply_templating(
+            content,
+            variables,
+            context.templater,
+            target_filename
+        )
+        if target_path.suffix == context.templater.suffix:
+            target_path = Path(target_path.stem)
         write_path = context.project_path / target_path
         write_path.parent.mkdir(parents=True, exist_ok=True)
-        content = apply_templating(content, variables, context.templater)
         with open(write_path, 'w') as file:
             file.write(content)

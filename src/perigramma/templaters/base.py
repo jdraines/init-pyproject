@@ -8,8 +8,10 @@ class ABCTemplater(ABC):
     All templaters should inherit from this class and implement the `render` method.
     """
 
+    suffix: str
+
     @abstractmethod
-    def render(template: str, context: dict) -> str:
+    def render(self, template: str, context: dict, template_filename: str = None) -> str:
         """
         Render a template with the given context.
 

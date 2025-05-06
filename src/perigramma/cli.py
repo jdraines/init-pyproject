@@ -13,9 +13,12 @@ def get_args():
     parser.add_argument("-p", "--path", default=None, help="Path to a template directory.")
     parser.add_argument("-o", "--output", help="Output directory for the project.", default=os.getcwd())
     parser.add_argument("-f", "--force", action="store_true", help="Force overwrite existing files.")
-    parser.add_argument("--confirm-defaults", action="store_true", help="Confirm using default values for template variables.")
+    parser.add_argument("--auto-use-defaults", action="store_true", help="Automatically use default values for template variables if present. (Overrides the template properties field of the same name.)")
     parser.add_argument("--debug", action="store_true", help="Enable debug mode.")
-    return parser.parse_args()
+    args = parser.parse_args()
+    if args.auto_use_defaults is False:
+        args.auto_use_defaults = None  # tracks only explicit True
+    return args
 
 
 def get_template(template_path) -> FilesystemTemplate:
@@ -50,7 +53,7 @@ def main():
             output_dir=output_dir,
             force=force,
             template=template,
-            auto_use_defaults=not args.confirm_defaults,
+            auto_use_defaults=args.auto_use_defaults,
             )
         print(f"Project '{project_name}' initialized successfully using the '{template_name}' template.")
     except Exception as e:

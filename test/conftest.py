@@ -31,6 +31,7 @@ def sample_template_dir(temp_dir) -> Path:
     # Create template properties file
     props_content = {
         "templater": "jinja2",
+        "auto_use_defaults": True,
         "custom_variables": [
             {
                 "name": "author",
@@ -51,14 +52,14 @@ def sample_template_dir(temp_dir) -> Path:
         yaml.dump(props_content, f)
 
     # Create template files
-    with open(template_content_dir / "pyproject.toml.template", "w") as f:
+    with open(template_content_dir / "pyproject.toml.jinja", "w") as f:
         f.write("""[project]
 name = "{{ project_name }}"
 version = "{{ version }}"
 authors = [{ name = "{{ author }}" }]
 """)
 
-    with open(template_content_dir / "README.md.template", "w") as f:
+    with open(template_content_dir / "README.md.jinja", "w") as f:
         f.write("""# {{ project_name }}
 
 A project by {{ author }}.
@@ -108,7 +109,7 @@ def sample_pystring_template_dir(temp_dir) -> Path:
         yaml.dump(props_content, f)
 
     # Create template files
-    with open(template_content_dir / "pyproject.toml.template", "w") as f:
+    with open(template_content_dir / "pyproject.toml.jinja", "w") as f:
         f.write("""[project]
 name = "${project_name}"
 version = "0.1.0"
