@@ -1,4 +1,4 @@
-name: Quickparser PR merge workflow
+name: Skaf PR merge workflow
 on:
   pull_request:
     types:
