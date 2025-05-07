@@ -66,6 +66,7 @@ def main():
             force=force,
             template=template,
             auto_use_defaults=args.auto_use_defaults,
+            _debug=args.debug
             )
         print(f"Project '{project_name}' initialized successfully using the '{template_name}' template.")
     except Exception as e:
