@@ -12,9 +12,10 @@ def get_args():
     parser.add_argument("name", help="The name of the project to create.")
     parser.add_argument("-t", "--template", default=None, help="Name of the project template to use.")
     parser.add_argument("-p", "--path", default=None, help="Path to a template directory.")
+    parser.add_argument("--varfile", default=None, help="Path to a yaml file holding variables values.")
     parser.add_argument("-g", "--git", default=None, help="URI of a git repo to be used as a template directory.")
     parser.add_argument("-o", "--output", help="Output directory for the project.", default=os.getcwd())
-    parser.add_argument("-f", "--force", action="store_true", help="Force overwrite existing files.")
+    parser.add_argument("--overwrite", action="store_true", help="Force overwrite existing files.")
     parser.add_argument("--auto-use-defaults", action="store_true", help="Automatically use default values for template variables if present. (Overrides the template properties field of the same name.)")
     parser.add_argument("--debug", action="store_true", help="Enable debug mode.")
     args = parser.parse_args()
@@ -48,7 +49,6 @@ def main():
     project_name = args.name
     template_name = args.template
     output_dir = args.output
-    force = args.force
     template_path = args.path
 
     template = None
@@ -64,9 +64,10 @@ def main():
             project_name=project_name,
             template_name=template_name,
             output_dir=output_dir,
-            force=force,
+            overwrite=args.overwrite,
             template=template,
             auto_use_defaults=args.auto_use_defaults,
+            varfile=args.varfile,
             _debug=args.debug
             )
         print(f"Project '{project_name}' initialized successfully using the '{template_name}' template.")

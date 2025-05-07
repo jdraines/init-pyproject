@@ -81,9 +81,10 @@ def map_paths(context: ScaffoldContext,
 def scaffold_project(project_name: str,
                      template_name: str = None,
                      output_dir: str = None,
-                     force: bool = False,
+                     overwrite: bool = False,
                      template: BaseTemplate = None,
                      auto_use_defaults: bool = True,
+                     varfile: str | None = None,
                      _debug: bool = False
                      ) -> None:
     """
@@ -99,9 +100,10 @@ def scaffold_project(project_name: str,
         project_name=project_name,
         template_name=template_name,
         output_dir=output_dir,
-        force=force,
+        overwrite=overwrite,
         auto_use_defaults=auto_use_defaults,
         template=template,
+        variables_filepath=Path(varfile) if varfile else None,
         _debug=_debug
     )
 
@@ -112,13 +114,13 @@ def scaffold_project(project_name: str,
         variables
     )
 
-    if not context.force:
+    if not context.overwrite:
         if all([
             context.project_path.exists(),
             context.project_path.is_dir(),
             os.listdir(context.project_path)
         ]):
-            print(f"Project directory '{context.project_path}' already exists. Set --force to overwrite.")
+            print(f"Project directory '{context.project_path}' already exists. Set --overwrite to overwrite.")
             sys.exit(1)
 
     context.project_path.mkdir(parents=True, exist_ok=True)

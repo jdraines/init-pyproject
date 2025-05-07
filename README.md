@@ -19,6 +19,13 @@ cd skaf
 pip install .
 ```
 
+## Features
+
+- Users can define project templates locally or in a git repo
+- Simple CLI command to apply scaffolding
+- Users can provide variable values via a yaml, environment variables, or interactively at the command line at scaffolding time.
+
+
 ## Creating your own templates
 
 1. **Create a template directory**  
@@ -75,10 +82,11 @@ skaf <project_name> [options]
 - `<project_name>`: The name of the project to create.
 
 ### Options:
-- `-t, --template <template_name>`: Specify the name of the project template to use.
-- `-p, --path <template_directory>`: Provide the path to a local template directory.
+- `-t, --template <template_name>`: Specify the name of the project template to use. Must proivde one of `--path` or `--template`.
+- `-p, --path <template_directory>`: Provide the path to a local template directory. Must proivde one of `--path` or `--template`.
 - `-o, --output <output_directory>`: Set the output directory for the project. Defaults to the current working directory.
-- `-f, --force`: Force overwrite of existing files if they already exist.
+- `--varfile <variables_filepath>`: Provide a filepath to a yaml file with key-values that provide variable values.
+- `--overwrite`: Allow overwrite of existing project directory if it exists.
 - `--auto-use-defaults`: Override the template properties' `auto_use_defaults` with an explicit value here.
 - `--debug`: Enable debug mode, which will raise exceptions rather than catching them with a tidier output.
 
