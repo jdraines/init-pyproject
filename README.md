@@ -82,8 +82,13 @@ skaf <project_name> [options]
 - `<project_name>`: The name of the project to create.
 
 ### Options:
-- `-t, --template <template_name>`: Specify the name of the project template to use. Must proivde one of `--path` or `--template`.
-- `-p, --path <template_directory>`: Provide the path to a local template directory. Must proivde one of `--path` or `--template`.
+
+#### Must have one of these  
+- `-t, --template <template_name>`: Specify the name of the project template to use. Must proivde one of `--path`, `--template`, or `--git`.
+- `-p, --path <template_directory>`: Provide the path to a local template directory. Must proivde one of `--path`, `--template`, or `--git`.
+- `-g, --git <git_connection_string>`: Provide a git repo that has the template directory structure to be used as a template source. Must proivde one of `--path`, `--template`, or `--git`.
+
+#### Entirely optional  
 - `-o, --output <output_directory>`: Set the output directory for the project. Defaults to the current working directory.
 - `--varfile <variables_filepath>`: Provide a filepath to a yaml file with key-values that provide variable values.
 - `--overwrite`: Allow overwrite of existing project directory if it exists.
