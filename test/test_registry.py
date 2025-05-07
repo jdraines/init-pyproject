@@ -1,14 +1,14 @@
 import pytest
 from unittest.mock import patch, MagicMock
 
-from perigramma.registry import (
+from skaf.registry import (
     register_template,
     get_template,
     load_and_register_packaged_templates,
     RegisterTemplateError,
     LoadTemplateError
 )
-from perigramma.template_classes.base import BaseTemplate
+from skaf.template_classes.base import BaseTemplate
 
 
 class MockTemplate(BaseTemplate):
@@ -59,8 +59,8 @@ class TestTemplateRegistry:
             get_template("none")
 
 
-@patch('perigramma.registry.FilesystemTemplate')
-@patch('perigramma.registry.template_lib_dir')
+@patch('skaf.registry.FilesystemTemplate')
+@patch('skaf.registry.template_lib_dir')
 class TestLoadTemplates:
     def test_load_and_register_packaged_templates(self, mock_template_lib_dir, mock_filesystem_template):
         # Setup mock

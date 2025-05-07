@@ -5,7 +5,7 @@ from .template_classes.base import BaseTemplate
 from .template_classes.filesystem_template import FilesystemTemplate
 
 
-_entry_points_group = "perigramma.template"
+_entry_points_group = "skaf.template"
 template_lib_dir = Path(__file__).parent / 'template_lib'
 
 

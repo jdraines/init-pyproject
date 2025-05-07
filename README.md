@@ -1,28 +1,28 @@
-# Perigramma
+# skaf
 
 ## Overview
-Perigramma is a Python tool designed to simplify project scaffolding. It provides a simple interface for defining project templates that can be rendered with minimal effort. Here's a quick guide to installing and making templates:
+skaf is a Python tool designed to simplify project scaffolding. It provides a simple interface for defining project templates that can be rendered with minimal effort. Here's a quick guide to installing and making templates:
 
 ## Installation
 
 Ensure you have Python 3.10 or above. Install using pip:
 
 ```bash
-pip install perigramma
+pip install skaf
 ```
 
 Alternatively, you can clone and install the local package:
 
 ```bash
 git clone <repository-url>
-cd perigramma
+cd skaf
 pip install .
 ```
 
 ## Creating your own templates
 
 1. **Create a template directory**  
-   In perigramma, templates are directories of files that may or may not contain templating blocks. The default templater is [jinja2](https://jinja.palletsprojects.com/en/stable/), which is a full-featured templating engine with advanced features. *(Note that perigramma does not currently use jinja Loaders)*
+   In skaf, templates are directories of files that may or may not contain templating blocks. The default templater is [jinja2](https://jinja.palletsprojects.com/en/stable/), which is a full-featured templating engine with advanced features. *(Note that skaf does not currently use jinja Loaders)*
 
    Any files that have a `.jinja` file suffix will be rendered. Otherwise, the file will be left as-is.
 
@@ -68,7 +68,7 @@ pip install .
 The CLI provides several flags and arguments to customize the initialization of a project with templates:
 
 ```bash
-perigramma <project_name> [options]
+skaf <project_name> [options]
 ```
 
 ### Positional Arguments:
@@ -86,25 +86,25 @@ perigramma <project_name> [options]
 
 1. **Creating a project with a template that is included in the package:**
    ```bash
-   perigramma my_project -t setuptools_pyproject
+   skaf my_project -t setuptools_pyproject
    ```
 
 2. **Using a local, user-defined template:**
    ```bash
-   perigramma my_project -p /path/to/my/template
+   skaf my_project -p /path/to/my/template
    ```
 
 3. **Defining an Output Directory:**
    ```bash
-   perigramma my_project -o /path/to/output -p /path/to/my/template
+   skaf my_project -o /path/to/output -p /path/to/my/template
    ```
 
 ## Developing Templates
 
-To create and use custom templates in Perigramma, follow these steps:
+To create and use custom templates in skaf, follow these steps:
 
 1. **Directory Setup**:
-   - In perigramma, templates are directories of files that contain templating blocks.
+   - In skaf, templates are directories of files that contain templating blocks.
      Custom templates can be created in an location on your local machine and should have
      the following structure:
 
@@ -130,7 +130,7 @@ To create and use custom templates in Perigramma, follow these steps:
 3. **Render your template**
    - Run the following command:
      ```bash
-     perigramma my-project --path path/to/my-template-root
+     skaf my-project --path path/to/my-template-root
      ```
 
 ## Development Dependencies
@@ -143,4 +143,4 @@ pip install .[dev]
 
 ## Contribute
 
-If you find a bug or have a feature request, please file an [issue](https://github.com/jdraines/perigramma/issues).
+If you find a bug or have a feature request, please file an [issue](https://github.com/jdraines/skaf/issues).

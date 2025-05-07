@@ -2,7 +2,7 @@ import os
 import pytest
 from pathlib import Path
 
-from perigramma.template_classes.filesystem_template import FilesystemTemplate
+from skaf.template_classes.filesystem_template import FilesystemTemplate
 
 
 class TestFilesystemTemplate:

@@ -1,8 +1,8 @@
 import pytest
 
-from perigramma.templaters.jinja import Jinja2Templater
-from perigramma.templaters.pystring import PystringTemplater
-from perigramma.templaters.registry import get_templater
+from skaf.templaters.jinja import Jinja2Templater
+from skaf.templaters.pystring import PystringTemplater
+from skaf.templaters.registry import get_templater
 
 
 class TestTemplaters:

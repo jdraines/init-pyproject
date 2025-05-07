@@ -3,8 +3,8 @@ requires = ["setuptools>=42", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "perigramma"
-version = "0.1.1"
+name = "skaf"
+version = "0.1.0"
 description = "A tool to scaffold a projects from templates"
 readme = "README.md"
 requires-python = ">=3.10"
@@ -27,10 +27,10 @@ dev = [
 ]
 
 [project.scripts]
-perigramma = "perigramma.cli:main"
+skaf = "skaf.cli:main"
 
 [tool.setuptools.package-data]
 "*" = ["template_lib/*.*"]
 
-[project.entry-points."perigramma.template"]
-none = "perigramma.template_classes._none:none_template"
+[project.entry-points."skaf.template"]
+none = "skaf.template_classes._none:none_template"

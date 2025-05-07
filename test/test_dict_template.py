@@ -1,8 +1,8 @@
 import pytest
 from unittest.mock import patch, MagicMock
 
-from perigramma.template_classes.dict_template import DictTemplate
-from perigramma.template_classes.base import TemplateProperties
+from skaf.template_classes.dict_template import DictTemplate
+from skaf.template_classes.base import TemplateProperties
 
 
 class TestDictTemplate:

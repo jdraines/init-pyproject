@@ -1,9 +1,9 @@
 import pytest
 from unittest.mock import patch, MagicMock
 
-from perigramma.templaters.registry import get_templater, _templaters
-from perigramma.templaters.jinja import Jinja2Templater
-from perigramma.templaters.pystring import PystringTemplater
+from skaf.templaters.registry import get_templater, _templaters
+from skaf.templaters.jinja import Jinja2Templater
+from skaf.templaters.pystring import PystringTemplater
 
 
 class TestTemplaterRegistryAdditional:
@@ -22,7 +22,7 @@ class TestTemplaterRegistryAdditional:
         
         assert "Templater 'nonexistent_templater' does not exist" in str(excinfo.value)
     
-    @patch('perigramma.templaters.registry._templaters')
+    @patch('skaf.templaters.registry._templaters')
     def test_get_templater_with_instantiation_error(self, mock_templaters):
         # Setup mock to raise exception during instantiation
         mock_templater_class = MagicMock(side_effect=ValueError('Templater initialization error'))

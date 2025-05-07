@@ -30,7 +30,7 @@ class GitTemplate(BaseTemplate):
         return properties or {}
 
     def _load_documents(self, temp_dir: str):
-        template_root = Path(temp_dir) / "templates"
+        template_root = Path(temp_dir) / "template"
         if not template_root.exists():
             raise FileNotFoundError(f"Template root directory '{template_root}' does not exist.")
         for root, dirs, files in os.walk(template_root):

@@ -3,7 +3,7 @@ import os
 from unittest.mock import patch, MagicMock
 import sys
 from pathlib import Path
-from perigramma.cli import get_args, get_filesystem_template, main
+from skaf.cli import get_args, get_filesystem_template, main
 
 
 class TestCliArgs:
@@ -37,7 +37,7 @@ class TestCliArgs:
 class TestGetTemplate:
     
     @patch('os.path.isdir')
-    @patch('perigramma.cli.FilesystemTemplate')
+    @patch('skaf.cli.FilesystemTemplate')
     def test_get_template_valid_path(self, mock_template_class, mock_isdir):
         # Setup mocks
         mock_isdir.return_value = True
@@ -68,9 +68,9 @@ class TestGetTemplate:
 
 class TestMain:
     
-    @patch('perigramma.cli.get_args')
-    @patch('perigramma.cli.get_filesystem_template')
-    @patch('perigramma.cli.scaffold_project')
+    @patch('skaf.cli.get_args')
+    @patch('skaf.cli.get_filesystem_template')
+    @patch('skaf.cli.scaffold_project')
     def test_main_success(self, mock_scaffold, mock_get_template, mock_get_args):
         # Setup mocks
         mock_args = MagicMock()
@@ -101,9 +101,9 @@ class TestMain:
             "Project 'test_project' initialized successfully using the 'test_template' template."
         )
     
-    @patch('perigramma.cli.get_args')
-    @patch('perigramma.cli.get_filesystem_template')
-    @patch('perigramma.cli.scaffold_project')
+    @patch('skaf.cli.get_args')
+    @patch('skaf.cli.get_filesystem_template')
+    @patch('skaf.cli.scaffold_project')
     def test_main_with_template_path(self, mock_scaffold, mock_get_template, mock_get_args):
         # Setup mocks
         mock_args = MagicMock()
@@ -139,8 +139,8 @@ class TestMain:
             "Project 'test_project' initialized successfully using the 'custom_template' template."
         )
     
-    @patch('perigramma.cli.get_args')
-    @patch('perigramma.cli.scaffold_project')
+    @patch('skaf.cli.get_args')
+    @patch('skaf.cli.scaffold_project')
     def test_main_with_error(self, mock_scaffold, mock_get_args):
         # Setup mocks
         mock_args = MagicMock()
@@ -167,8 +167,8 @@ class TestMain:
         )
         mock_exit.assert_called_once_with(1)
     
-    @patch('perigramma.cli.get_args')
-    @patch('perigramma.cli.scaffold_project')
+    @patch('skaf.cli.get_args')
+    @patch('skaf.cli.scaffold_project')
     def test_main_debug_mode(self, mock_scaffold, mock_get_args):
         # Setup mocks
         mock_args = MagicMock()

@@ -5,9 +5,9 @@ from pathlib import Path
 import pytest
 from typing import Generator
 
-from perigramma.template_classes.filesystem_template import FilesystemTemplate
-from perigramma.templaters.jinja import Jinja2Templater
-from perigramma.templaters.pystring import PystringTemplater
+from skaf.template_classes.filesystem_template import FilesystemTemplate
+from skaf.templaters.jinja import Jinja2Templater
+from skaf.templaters.pystring import PystringTemplater
 
 
 @pytest.fixture

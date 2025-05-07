@@ -14,7 +14,7 @@ from .templaters.registry import get_templater
 
 template_lib_dir = Path(__file__).parent / 'template_lib'
 TEMPLATE_PROPERTIES_FILENAME = 'template_properties.yaml'
-DEFAULT_TEMPLATER = os.environ.get('PERIGRAMMA_TEMPLATER', 'jinja2')
+DEFAULT_TEMPLATER = os.environ.get('skaf_TEMPLATER', 'jinja2')
 
 
 @dataclass
