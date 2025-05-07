@@ -1,45 +1,17 @@
 import os
-import re
 import sys
 from pathlib import Path
 import yaml
 from typing import Any
-from dataclasses import dataclass, field
 
-from string import Template
-from .template_classes.base import BaseTemplate
-from .registry import get_template
-from .templaters.base import ABCTemplater
-from .templaters.registry import get_templater
+from ..template_classes.base import BaseTemplate
+from ..templaters.base import ABCTemplater
 from .variables import get_variable_values
+from .context import ScaffoldContext
+
 
 template_lib_dir = Path(__file__).parent / 'template_lib'
 TEMPLATE_PROPERTIES_FILENAME = 'template_properties.yaml'
-DEFAULT_TEMPLATER = os.environ.get('skaf_TEMPLATER', 'jinja2')
-
-
-@dataclass
-class ScaffoldContext:
-    project_name: str
-    template_name: str
-    output_dir: Path
-    force: bool = False
-    auto_use_defaults: bool | None = None
-    project_path: Path = None
-    template: BaseTemplate = None
-    templater: ABCTemplater = None
-    _debug: bool = False
-
-    def __post_init__(self):
-        self.project_name = sanitize_project_name(self.project_name)
-        self.project_path = self.output_dir / self.project_name
-        if not self.template and self.template_name:
-            self.template = get_template(self.template_name)
-        elif not self.template:
-            raise ValueError("Either template or template_name must be provided.")
-        self.templater = get_templater(self.template.properties.get('templater', DEFAULT_TEMPLATER))
-        if self.auto_use_defaults is None:
-            self.auto_use_defaults = self.template.properties.get('auto_use_defaults', False)
 
 
 def apply_templating(document: str,
@@ -59,7 +31,7 @@ def apply_templating(document: str,
         raise RuntimeError(f"Error applying templating: {e}")
 
 
-def get_template_dir(template_name: str) -> Path:
+def get_package_template_dir(template_name: str) -> Path:
     """
     Returns the path to the specified template directory.
     If the template does not exist, raises a FileNotFoundError.
@@ -71,7 +43,7 @@ def get_template_dir(template_name: str) -> Path:
 
 
 def load_template_properties(template_name) -> dict:
-    template_dir = get_template_dir(template_name)
+    template_dir = get_package_template_dir(template_name)
     properties_filename = template_dir / TEMPLATE_PROPERTIES_FILENAME
     with open(properties_filename, 'r') as file:
         properties = yaml.safe_load(file)
@@ -87,19 +59,6 @@ def get_template_variable_values(context: ScaffoldContext) -> dict[str, Any]:
         etype = type(e).__name__
         print(f"Error getting variable values: {etype}: {e}")
         sys.exit(1)
-
-
-def sanitize_project_name(name: str) -> str:
-    """
-    Converts the provided project name to a valid Python package name.
-    Lowercases the name, replaces non-alphanumeric characters with underscores,
-    and prepends an underscore if the name starts with a digit.
-    """
-    name = name.lower()
-    sanitized = re.sub(r'\W+', '_', name)
-    if sanitized and sanitized[0].isdigit():
-        sanitized = "_" + sanitized
-    return sanitized
 
 
 def map_paths(context: ScaffoldContext,

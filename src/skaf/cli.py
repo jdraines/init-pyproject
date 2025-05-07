@@ -6,6 +6,7 @@ from argparse import ArgumentParser
 from .template_classes.filesystem_template import FilesystemTemplate
 from .template_classes.git_template import GitTemplate
 
+
 def get_args():
     parser = ArgumentParser(description="Run the templater to build out a project file structure from templates.")
     parser.add_argument("name", help="The name of the project to create.")

@@ -8,6 +8,7 @@ from typing import Generator
 from skaf.template_classes.filesystem_template import FilesystemTemplate
 from skaf.templaters.jinja import Jinja2Templater
 from skaf.templaters.pystring import PystringTemplater
+from skaf import registry as reg
 
 
 @pytest.fixture

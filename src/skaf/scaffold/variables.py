@@ -1,5 +1,5 @@
 from typing import Any
-from .scaffold import ScaffoldContext
+from .context import ScaffoldContext
 import re
 import sys
 import os
@@ -21,10 +21,10 @@ def add_project_name_variables(project_name: str, variables):
     """
     Adds project name and several other derivatives (project_name_snake, project_name_pascal, project_name_kebab)"""
     variables['project_name'] = project_name
-    project_name_snake = re.sub(r'(?<!^)(?=[A-Z])', '_', project_name).lower()
+    project_name_snake = re.sub(r'(?<!^)(?=[A-Z])', '_', project_name).lower().replace("-", "_")
     variables['project_name_snake'] = project_name_snake
     variables['project_name_pascal'] = ''.join(word.capitalize() for word in project_name_snake.split('_'))
-    variables['project_name_kebab'] = project_name.replace('_', '-')
+    variables['project_name_kebab'] = project_name_snake.replace('_', '-')
     variables['project_name_title'] = project_name.replace("_", " ").title()
     return variables
 
