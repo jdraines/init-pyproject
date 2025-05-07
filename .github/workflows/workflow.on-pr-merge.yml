@@ -24,7 +24,7 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       name: pypi
-      url: https://pypi.org/p/perigramma
+      url: https://pypi.org/p/skaf
     permissions:
       id-token: write 
     steps:

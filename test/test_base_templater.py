@@ -1,7 +1,7 @@
 import pytest
 from unittest.mock import patch, MagicMock
 
-from perigramma.templaters.base import ABCTemplater
+from skaf.templaters.base import ABCTemplater
 
 
 class TestBaseTemplater:

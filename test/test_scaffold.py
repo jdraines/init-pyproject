@@ -5,7 +5,7 @@ from pathlib import Path
 from unittest.mock import patch, MagicMock, mock_open
 from copy import copy
 
-from perigramma.scaffold import (
+from skaf.scaffold import (
     sanitize_project_name,
     apply_templating,
     add_project_name_variables,
@@ -16,8 +16,8 @@ from perigramma.scaffold import (
     get_template_dir,
     load_template_properties
 )
-from perigramma.templaters.jinja import Jinja2Templater
-from perigramma.template_classes.filesystem_template import FilesystemTemplate
+from skaf.templaters.jinja import Jinja2Templater
+from skaf.template_classes.filesystem_template import FilesystemTemplate
 
 
 class TestScaffoldUtilities:
@@ -299,7 +299,7 @@ class TestMapPaths:
 
 
 class TestScaffoldProject:
-    @patch('perigramma.scaffold.get_template_variable_values')
+    @patch('skaf.scaffold.get_template_variable_values')
     def test_scaffold_project_basic(self, mock_get_vars, filesystem_template, temp_dir):
         # Setup mock
         mock_get_vars.return_value = {
@@ -337,7 +337,7 @@ class TestScaffoldProject:
             assert "# test_project" in content
             assert "A project by Test Author" in content
     
-    @patch('perigramma.scaffold.get_template_variable_values')
+    @patch('skaf.scaffold.get_template_variable_values')
     def test_scaffold_project_existing_dir(self, mock_get_vars, filesystem_template, temp_dir):
         # Setup mock
         mock_get_vars.return_value = {
@@ -380,14 +380,14 @@ class TestScaffoldProject:
         assert (project_dir / "pyproject.toml").exists()
         assert (project_dir / "existing_file.txt").exists()  # Original file should still be there
     
-    @patch('perigramma.scaffold.ScaffoldContext')
-    @patch('perigramma.scaffold.get_template_variable_values')
-    @patch('perigramma.scaffold.map_paths')
+    @patch('skaf.scaffold.ScaffoldContext')
+    @patch('skaf.scaffold.get_template_variable_values')
+    @patch('skaf.scaffold.map_paths')
     @patch('os.listdir')
     @patch('pathlib.Path.exists')
     @patch('pathlib.Path.mkdir')
     @patch('builtins.open', new_callable=mock_open)
-    @patch('perigramma.scaffold.apply_templating')
+    @patch('skaf.scaffold.apply_templating')
     def test_scaffold_project_mock_implementation(self, mock_apply_templating, mock_open_file, mock_mkdir,
                                      mock_exists, mock_listdir, mock_map_paths, mock_get_vars, mock_context):
         # Setup mocks
@@ -426,7 +426,7 @@ class TestScaffoldProject:
         assert mock_open_file.call_count == 2
         assert mock_apply_templating.call_count == 2
     
-    @patch('perigramma.scaffold.ScaffoldContext')
+    @patch('skaf.scaffold.ScaffoldContext')
     @patch('os.listdir')
     @patch('pathlib.Path.exists')
     @patch('pathlib.Path.is_dir')
