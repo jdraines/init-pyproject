@@ -82,10 +82,10 @@ skaf <project_name> [options]
 - `<project_name>`: The name of the project to create.
 
 ### Options:
-- `-t, --template <template_name>`: Specify the name of the project template to use.
-- `-p, --path <template_directory>`: Provide the path to a local template directory.
+- `-t, --template <template_name>`: Specify the name of the project template to use. Must proivde one of `--path` or `--template`.
+- `-p, --path <template_directory>`: Provide the path to a local template directory. Must proivde one of `--path` or `--template`.
 - `-o, --output <output_directory>`: Set the output directory for the project. Defaults to the current working directory.
-- `--varfile <variables_filepath>`: Provide a filepath to a yaml file with key-values that provide variable values
+- `--varfile <variables_filepath>`: Provide a filepath to a yaml file with key-values that provide variable values.
 - `--overwrite`: Allow overwrite of existing project directory if it exists.
 - `--auto-use-defaults`: Override the template properties' `auto_use_defaults` with an explicit value here.
 - `--debug`: Enable debug mode, which will raise exceptions rather than catching them with a tidier output.
