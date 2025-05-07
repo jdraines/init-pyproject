@@ -23,7 +23,7 @@ pip install .
 
 - Users can define project templates locally or in a git repo
 - Simple CLI command to apply scaffolding
-- Users can provide variable values via a yaml, environment variables, or via CLI prompts at scaffolding time.
+- Users can provide variable values via a yaml, environment variables, or interactively at the command line at scaffolding time.
 
 
 ## Creating your own templates
