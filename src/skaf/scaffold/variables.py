@@ -1,8 +1,9 @@
 from typing import Any
 from .context import ScaffoldContext
 import re
-import sys
 import os
+import yaml
+from pathlib import Path
 
 ENV_VAR_PREFIX = "SKAF_"
 
@@ -37,8 +38,24 @@ def get_env_variable(name: str) -> Any:
     return os.environ.get(env_var)
 
 
+def load_variables_filepath(filepath: Path) -> dict[str, Any]:
+    """
+    Load variables from a YAML file.
+    """
+    if not filepath.exists():
+        raise FileNotFoundError(f"Variables file '{filepath}' does not exist.")
+    with open(filepath, 'r') as file:
+        variables = yaml.safe_load(file)
+    return variables
+
+
 def get_variable_values(context: ScaffoldContext) -> dict[str, Any]:
     values = {}
+
+    values_from_file = {}
+    if context.variables_filepath:
+        values_from_file = load_variables_filepath(context.variables_filepath)
+
     for custom_var in context.template.custom_variables:
         varname = custom_var['name']
         vartype = custom_var.get('type', 'str')
@@ -50,6 +67,12 @@ def get_variable_values(context: ScaffoldContext) -> dict[str, Any]:
                 continue
             except Exception as e:
                 raise type(e)(f"Environment variable {from_env} cannot be used with caster {caster}: {e}")
+        if varname in values_from_file:
+            try:
+                values[varname] = caster(values_from_file[varname])
+                continue
+            except Exception as e:
+                raise type(e)(f"Variable {varname} cannot be used with caster {caster}: {e}")
         if context.auto_use_defaults and default is not None:
             try:
                 values[varname] = caster(default)

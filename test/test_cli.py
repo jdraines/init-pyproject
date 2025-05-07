@@ -16,11 +16,13 @@ class TestCliArgs:
         mock_args.template = 'test_template'
         mock_args.path = None
         mock_args.output = '/test/output'
-        mock_args.force = False
+        mock_args.overwrite = False
         mock_args.confirm_defaults = True
         mock_args.debug = False
+        mock_args.varfile = None
         mock_parse_args.return_value = mock_args
         mock_args.git = None
+
         
         # Call function
         args = get_args()
@@ -29,7 +31,7 @@ class TestCliArgs:
         assert args.name == 'test_project'
         assert args.template == 'test_template'
         assert args.output == '/test/output'
-        assert args.force is False
+        assert args.overwrite is False
         assert args.confirm_defaults is True
         assert args.debug is False
 
@@ -77,7 +79,8 @@ class TestMain:
         mock_args.name = 'test_project'
         mock_args.template = 'test_template'
         mock_args.output = '/test/output'
-        mock_args.force = False
+        mock_args.overwrite = False
+        mock_args.varfile = None
         mock_args.path = None
         mock_args.auto_use_defaults = None
         mock_args.debug = False
@@ -93,9 +96,10 @@ class TestMain:
             project_name='test_project',
             template_name='test_template',
             output_dir='/test/output',
-            force=False,
+            overwrite=False,
             template=None,
             auto_use_defaults=None,
+            varfile=None,
             _debug = False
         )
         mock_print.assert_called_once_with(
@@ -111,11 +115,12 @@ class TestMain:
         mock_args.name = 'test_project'
         mock_args.template = None
         mock_args.output = '/test/output'
-        mock_args.force = False
+        mock_args.overwrite = False
         mock_args.path = '/path/to/template'
         mock_args.auto_use_defaults = True
         mock_args.debug = False
         mock_args.git = None
+        mock_args.varfile = None
         mock_get_args.return_value = mock_args
         
         mock_template = MagicMock()
@@ -132,9 +137,10 @@ class TestMain:
             project_name='test_project',
             template_name='custom_template',
             output_dir='/test/output',
-            force=False,
+            overwrite=False,
             template=mock_template,
             auto_use_defaults=True,
+            varfile=None,
             _debug=False
         )
         mock_print.assert_called_once_with(
@@ -149,10 +155,11 @@ class TestMain:
         mock_args.name = 'test_project'
         mock_args.template = 'test_template'
         mock_args.output = '/test/output'
-        mock_args.force = False
+        mock_args.overwrite = False
         mock_args.path = None
         mock_args.confirm_defaults = False
         mock_args.debug = False
+        mock_args.varfile = None
         mock_get_args.return_value = mock_args
         mock_args.git = None
         
@@ -177,10 +184,11 @@ class TestMain:
         mock_args.name = 'test_project'
         mock_args.template = 'test_template'
         mock_args.output = '/test/output'
-        mock_args.force = False
+        mock_args.overwrite = False
         mock_args.path = None
         mock_args.confirm_defaults = False
         mock_args.debug = True
+        mock_args.varfile = None
         mock_get_args.return_value = mock_args
         mock_args.git = None
         

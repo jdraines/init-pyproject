@@ -91,6 +91,7 @@ class TestGetTemplateVariableValues:
         context.template = mock_template
         context.project_name = 'test_project'
         context.auto_use_defaults = False
+        context.variables_filepath = None
         
         # Setup input responses
         mock_input.side_effect = ['John Doe', '']
@@ -118,6 +119,7 @@ class TestGetTemplateVariableValues:
         context.template = mock_template
         context.project_name = 'test_project'
         context.auto_use_defaults = True
+        context.variables_filepath = None
         
         # Call function
         result = get_template_variable_values(context)
@@ -142,6 +144,7 @@ class TestGetTemplateVariableValues:
         context.project_name = 'test_project'
         context.auto_use_defaults = False
         context._debug = True
+        context.variables_filepath = None
         
         # Setup input to cause ValueError
         mock_input.return_value = 'not-a-number'
@@ -322,14 +325,15 @@ class TestScaffoldProject:
             "project_name_title": "Test_project"
         }
         
-        # Run the scaffold function
+        # Run the scaffold functions
         scaffold_project(
             project_name="test_project",
             template_name="test_template",
             output_dir=str(temp_dir),
             template=filesystem_template,
             auto_use_defaults=True,
-            force=True
+            overwrite=True,
+            varfile=None,
         )
         
         # Check that the expected files were created
@@ -372,7 +376,7 @@ class TestScaffoldProject:
                 template_name="test_template",
                 output_dir=str(temp_dir),
                 template=filesystem_template,
-                force=False,
+                overwrite=False,
                 auto_use_defaults=True
             )
         
@@ -382,7 +386,7 @@ class TestScaffoldProject:
             template_name="test_template",
             output_dir=str(temp_dir),
             template=filesystem_template,
-            force=True,
+            overwrite=True,
             auto_use_defaults=True
         )
         
@@ -428,7 +432,7 @@ class TestScaffoldProject:
             template_name='test_template',
             template=filesystem_template,
             output_dir='/output',
-            force=False
+            overwrite=False
         )
         
         # Verify results
@@ -451,7 +455,7 @@ class TestScaffoldProject:
         mock_context_instance.template_name = 'test_template'
         mock_context_instance.project_name = 'test_project'
         mock_context_instance.project_path = Path('/output/test_project')
-        mock_context_instance.force = False
+        mock_context_instance.overwrite = False
         mock_context.return_value = mock_context_instance
         
         # Setup directory checks to indicate it exists with files
@@ -465,12 +469,12 @@ class TestScaffoldProject:
                 project_name='test_project',
                 template_name='test_template',
                 output_dir='/output',
-                force=False,
+                overwrite=False,
                 template=filesystem_template
             )
         
         # Verify exit due to existing directory
         mock_print.assert_called_once_with(
-            "Project directory '/output/test_project' already exists. Set --force to overwrite."
+            "Project directory '/output/test_project' already exists. Set --overwrite to overwrite."
         )
         mock_exit.assert_called_once_with(1)

@@ -17,11 +17,12 @@ class ScaffoldContext:
     project_name: str
     template_name: str
     output_dir: Path
-    force: bool = False
+    overwrite: bool = False
     auto_use_defaults: bool | None = None
     project_path: Path = None
     template: BaseTemplate = None
     templater: ABCTemplater = None
+    variables_filepath: Path | None = None
     _debug: bool = False
 
     def __post_init__(self):
