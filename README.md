@@ -37,7 +37,7 @@ pip install .
 
    ```
    my-template-root/
-      ├── templates/
+      ├── template/
       │   └── [any files you want]
       └── template_properties.yaml   # this is metadata
    ```
@@ -45,7 +45,7 @@ pip install .
    For example, imagine I want to generate a customized hello world printer that is hard-coded to say hello to a specific person named John. I would create the following file:
 
    ```jinja
-   # my-template-root/templates/hello.py.jinja
+   # my-template-root/template/hello.py.jinja
 
    print("Hello {{ some_name }}!")
    ```
