@@ -1,3 +1,4 @@
+name: Reusable version check
 on:
   workflow_call:
     inputs:

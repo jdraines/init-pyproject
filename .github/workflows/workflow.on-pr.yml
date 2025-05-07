@@ -1,4 +1,4 @@
-name: Quickparser PR workflow
+name: Skaf PR workflow
 on:
   pull_request:
     branches:

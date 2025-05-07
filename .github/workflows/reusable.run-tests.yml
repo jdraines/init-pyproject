@@ -1,3 +1,4 @@
+name: Reusable run tests 
 on:
   workflow_call:
 

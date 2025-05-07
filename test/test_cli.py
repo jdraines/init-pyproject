@@ -95,7 +95,8 @@ class TestMain:
             output_dir='/test/output',
             force=False,
             template=None,
-            auto_use_defaults=None
+            auto_use_defaults=None,
+            _debug = False
         )
         mock_print.assert_called_once_with(
             "Project 'test_project' initialized successfully using the 'test_template' template."
@@ -133,7 +134,8 @@ class TestMain:
             output_dir='/test/output',
             force=False,
             template=mock_template,
-            auto_use_defaults=True
+            auto_use_defaults=True,
+            _debug=False
         )
         mock_print.assert_called_once_with(
             "Project 'test_project' initialized successfully using the 'custom_template' template."

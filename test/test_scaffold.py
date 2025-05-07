@@ -5,17 +5,28 @@ from pathlib import Path
 from unittest.mock import patch, MagicMock, mock_open
 from copy import copy
 
-from skaf.scaffold import (
-    sanitize_project_name,
+from skaf.scaffold.scaffold import (
     apply_templating,
-    add_project_name_variables,
     map_paths,
-    ScaffoldContext,
     scaffold_project,
     get_template_variable_values,
-    get_template_dir,
+    get_package_template_dir,
     load_template_properties
 )
+
+from skaf.scaffold.context import (
+    ScaffoldContext,
+)
+
+from skaf.scaffold.variables import (
+    get_variable_values,
+    add_project_name_variables
+)
+
+from skaf.scaffold.utils import (
+    sanitize_project_name
+)
+
 from skaf.templaters.jinja import Jinja2Templater
 from skaf.template_classes.filesystem_template import FilesystemTemplate
 
@@ -130,27 +141,26 @@ class TestGetTemplateVariableValues:
         context.template = mock_template
         context.project_name = 'test_project'
         context.auto_use_defaults = False
+        context._debug = True
         
         # Setup input to cause ValueError
         mock_input.return_value = 'not-a-number'
         
         # Call function
-        with patch('builtins.print') as mock_print:
+        with pytest.raises(ValueError):
             get_template_variable_values(context)
         
-        # Verify system exit
-        mock_exit.assert_called_once()
 
 
 class TestGetTemplateDir:
     
     @patch('pathlib.Path.exists')
-    def test_get_template_dir_exists(self, mock_exists):
+    def test_get_package_template_dir_exists(self, mock_exists):
         # Setup mock
         mock_exists.return_value = True
         
         # Call function
-        result = get_template_dir('test_template')
+        result = get_package_template_dir('test_template')
         
         # Verify result is a Path object ending with test_template
         assert isinstance(result, Path)
@@ -163,7 +173,7 @@ class TestGetTemplateDir:
         
         # Call function and verify exception
         with pytest.raises(FileNotFoundError) as excinfo:
-            get_template_dir('nonexistent_template')
+            get_package_template_dir('nonexistent_template')
         
         # Verify error message
         assert "Template 'nonexistent_template' does not exist" in str(excinfo.value)
@@ -299,7 +309,7 @@ class TestMapPaths:
 
 
 class TestScaffoldProject:
-    @patch('skaf.scaffold.get_template_variable_values')
+    @patch('skaf.scaffold.scaffold.get_template_variable_values')
     def test_scaffold_project_basic(self, mock_get_vars, filesystem_template, temp_dir):
         # Setup mock
         mock_get_vars.return_value = {
@@ -337,7 +347,7 @@ class TestScaffoldProject:
             assert "# test_project" in content
             assert "A project by Test Author" in content
     
-    @patch('skaf.scaffold.get_template_variable_values')
+    @patch('skaf.scaffold.scaffold.get_template_variable_values')
     def test_scaffold_project_existing_dir(self, mock_get_vars, filesystem_template, temp_dir):
         # Setup mock
         mock_get_vars.return_value = {
@@ -380,16 +390,16 @@ class TestScaffoldProject:
         assert (project_dir / "pyproject.toml").exists()
         assert (project_dir / "existing_file.txt").exists()  # Original file should still be there
     
-    @patch('skaf.scaffold.ScaffoldContext')
-    @patch('skaf.scaffold.get_template_variable_values')
-    @patch('skaf.scaffold.map_paths')
+    @patch('skaf.scaffold.scaffold.ScaffoldContext')
+    @patch('skaf.scaffold.scaffold.get_template_variable_values')
+    @patch('skaf.scaffold.scaffold.map_paths')
     @patch('os.listdir')
     @patch('pathlib.Path.exists')
     @patch('pathlib.Path.mkdir')
     @patch('builtins.open', new_callable=mock_open)
-    @patch('skaf.scaffold.apply_templating')
+    @patch('skaf.scaffold.scaffold.apply_templating')
     def test_scaffold_project_mock_implementation(self, mock_apply_templating, mock_open_file, mock_mkdir,
-                                     mock_exists, mock_listdir, mock_map_paths, mock_get_vars, mock_context):
+                                     mock_exists, mock_listdir, mock_map_paths, mock_get_vars, mock_context, filesystem_template):
         # Setup mocks
         mock_context_instance = MagicMock()
         mock_context_instance.template_name = 'test_template'
@@ -397,6 +407,7 @@ class TestScaffoldProject:
         mock_context_instance.project_path = Path('/output/test_project')
         mock_context_instance.force = False
         mock_context.return_value = mock_context_instance
+        mock_context._debug = False
         
         mock_get_vars.return_value = {'project_name': 'test_project'}
         
@@ -415,6 +426,7 @@ class TestScaffoldProject:
         scaffold_project(
             project_name='test_project',
             template_name='test_template',
+            template=filesystem_template,
             output_dir='/output',
             force=False
         )
@@ -426,14 +438,14 @@ class TestScaffoldProject:
         assert mock_open_file.call_count == 2
         assert mock_apply_templating.call_count == 2
     
-    @patch('skaf.scaffold.ScaffoldContext')
+    @patch('skaf.scaffold.scaffold.ScaffoldContext')
     @patch('os.listdir')
     @patch('pathlib.Path.exists')
     @patch('pathlib.Path.is_dir')
     @patch('pathlib.Path.mkdir')
     @patch('sys.exit')
     def test_scaffold_project_existing_dir_no_force_mock(self, mock_exit, mock_mkdir, mock_is_dir,
-                                                 mock_exists, mock_listdir, mock_context):
+                                                 mock_exists, mock_listdir, mock_context, filesystem_template):
         # Setup mocks
         mock_context_instance = MagicMock()
         mock_context_instance.template_name = 'test_template'
@@ -453,7 +465,8 @@ class TestScaffoldProject:
                 project_name='test_project',
                 template_name='test_template',
                 output_dir='/output',
-                force=False
+                force=False,
+                template=filesystem_template
             )
         
         # Verify exit due to existing directory
