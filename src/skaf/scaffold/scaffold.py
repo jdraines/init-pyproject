@@ -136,7 +136,7 @@ def scaffold_project(project_name: str,
             target_filename
         )
         if target_path.suffix == context.templater.suffix:
-            target_path = Path(target_path.stem)
+            target_path = Path(target_path.parent / target_path.stem)
         write_path = context.project_path / target_path
         write_path.parent.mkdir(parents=True, exist_ok=True)
         with open(write_path, 'w') as file:
