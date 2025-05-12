@@ -18,6 +18,7 @@ def get_args():
     parser.add_argument("--overwrite", action="store_true", help="Force overwrite existing files.")
     parser.add_argument("--auto-use-defaults", action="store_true", help="Automatically use default values for template variables if present. (Overrides the template properties field of the same name.)")
     parser.add_argument("--debug", action="store_true", help="Enable debug mode.")
+    parser.add_argument("--no-project-dir", action="store_true", help="Do not create a project directory.")
     args = parser.parse_args()
     if args.auto_use_defaults is False:
         args.auto_use_defaults = None  # tracks only explicit True
@@ -64,6 +65,7 @@ def main():
             project_name=project_name,
             template_name=template_name,
             output_dir=output_dir,
+            no_project_dir=args.no_project_dir,
             overwrite=args.overwrite,
             template=template,
             auto_use_defaults=args.auto_use_defaults,

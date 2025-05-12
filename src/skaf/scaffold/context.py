@@ -17,6 +17,7 @@ class ScaffoldContext:
     project_name: str
     template_name: str
     output_dir: Path
+    no_project_dir: bool = False
     overwrite: bool = False
     auto_use_defaults: bool | None = None
     project_path: Path = None
@@ -27,7 +28,10 @@ class ScaffoldContext:
 
     def __post_init__(self):
         self.project_name = sanitize_project_name(self.project_name)
-        self.project_path = self.output_dir / self.project_name
+        if self.no_project_dir:
+            self.project_path = self.output_dir
+        else:
+            self.project_path = self.output_dir / self.project_name
         if not self.template and self.template_name:
             self.template = get_template(self.template_name)
         elif not self.template:
