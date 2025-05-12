@@ -20,6 +20,7 @@ class TestCliArgs:
         mock_args.confirm_defaults = True
         mock_args.debug = False
         mock_args.varfile = None
+        mock_args.no_project_dir = False
         mock_parse_args.return_value = mock_args
         mock_args.git = None
 
@@ -84,6 +85,7 @@ class TestMain:
         mock_args.path = None
         mock_args.auto_use_defaults = None
         mock_args.debug = False
+        mock_args.no_project_dir = False
         mock_get_args.return_value = mock_args
         mock_args.git = None
         
@@ -97,6 +99,7 @@ class TestMain:
             template_name='test_template',
             output_dir='/test/output',
             overwrite=False,
+            no_project_dir=False,
             template=None,
             auto_use_defaults=None,
             varfile=None,
@@ -121,6 +124,7 @@ class TestMain:
         mock_args.debug = False
         mock_args.git = None
         mock_args.varfile = None
+        mock_args.no_project_dir = False
         mock_get_args.return_value = mock_args
         
         mock_template = MagicMock()
@@ -137,6 +141,7 @@ class TestMain:
             project_name='test_project',
             template_name='custom_template',
             output_dir='/test/output',
+            no_project_dir=False,
             overwrite=False,
             template=mock_template,
             auto_use_defaults=True,
@@ -160,6 +165,7 @@ class TestMain:
         mock_args.confirm_defaults = False
         mock_args.debug = False
         mock_args.varfile = None
+        mock_args.no_project_dir = False
         mock_get_args.return_value = mock_args
         mock_args.git = None
         
@@ -189,6 +195,7 @@ class TestMain:
         mock_args.confirm_defaults = False
         mock_args.debug = True
         mock_args.varfile = None
+        mock_args.no_project_dir = False
         mock_get_args.return_value = mock_args
         mock_args.git = None
         

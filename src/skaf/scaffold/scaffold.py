@@ -85,6 +85,7 @@ def scaffold_project(project_name: str,
                      template: BaseTemplate = None,
                      auto_use_defaults: bool = True,
                      varfile: str | None = None,
+                     no_project_dir: bool = False,
                      _debug: bool = False
                      ) -> None:
     """
@@ -100,6 +101,7 @@ def scaffold_project(project_name: str,
         project_name=project_name,
         template_name=template_name,
         output_dir=output_dir,
+        no_project_dir=no_project_dir,
         overwrite=overwrite,
         auto_use_defaults=auto_use_defaults,
         template=template,
