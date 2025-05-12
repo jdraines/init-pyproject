@@ -71,7 +71,7 @@ pip install .
 
    The two top-level fields `templater` and `auto_use_defaults` are shown here with default values.
 
-3. **(Optional) Create a `variables_helper.py`**
+3. **(Optional) Create a `variables_helper.py`**  
    It may be the case that you want to use some user-provided variable values to derive some other template variable
    value. For this, you can create a python file outside your `template/` directory, next to `template_properties.yaml` called `variables_helper.py` and define a `variables_helper` function
    that has the following form:
