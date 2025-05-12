@@ -39,7 +39,9 @@ pip install .
    my-template-root/
       ├── template/
       │   └── [any files you want]
-      └── template_properties.yaml   # this is metadata
+      ├── template_properties.yaml   # this is metadata. required.
+      └── variables_helper.py        # optional
+      
    ```
 
    For example, imagine I want to generate a customized hello world printer that is hard-coded to say hello to a specific person named John. I would create the following file:
@@ -69,6 +71,53 @@ pip install .
 
    The two top-level fields `templater` and `auto_use_defaults` are shown here with default values.
 
+3. **(Optional) Create a `variables_helper.py`**
+   It may be the case that you want to use some user-provided variable values to derive some other template variable
+   value. For this, you can create a python file outside your `template/` directory, next to `template_properties.yaml` called `variables_helper.py` and define a `variables_helper` function
+   that has the following form:
+
+   ```python
+   # variables_helper.py
+
+   def variables_helper(variables: dict) -> dict:
+      ...
+   ```
+
+   The function should accept a dictionary of variable values and return a dict. For example, imagine that you were
+   provided a `namespace` variable with a value like `"com.mydomain.example"` and you wanted to turn that into a directory path string like `"com/mydomain/example"`. You could define a variables helper function like:
+
+   ```python
+   # variables_helper.py
+
+   def variables_helper(variables: dict) -> dict:
+      variables["namespace_path"] = variables["namespace"].replace(".", "/")
+   ```
+
+   This particular use case could be helpful in a templating scenario where you declared a template directory like:
+   
+   ```
+   my-template-root/
+      ├── template/
+            └──src/
+               └──main/
+                  └──java/
+                     └── {{ namespace_path }}
+                           └── MyClass.java
+   ```
+
+   When the user provides a namespace `com.mydomain.example`, the rendedered template would look like
+
+   ```
+   my-template-root/
+      ├── template/
+            └──src/
+               └──main/
+                  └──java/
+                     └──com/
+                        └──mydomain/
+                           └──example/
+                              └── MyClass.java
+   ```
 
 ## Command-line Usage
 
@@ -93,6 +142,7 @@ skaf <project_name> [options]
 - `--varfile <variables_filepath>`: Provide a filepath to a yaml file with key-values that provide variable values.
 - `--overwrite`: Allow overwrite of existing project directory if it exists.
 - `--auto-use-defaults`: Override the template properties' `auto_use_defaults` with an explicit value here.
+- `--no-project-dir`: Do not create a top-level `<project_name>` directory, but scaffold all templates directly into the output directory.
 - `--debug`: Enable debug mode, which will raise exceptions rather than catching them with a tidier output.
 
 ### Example Commands

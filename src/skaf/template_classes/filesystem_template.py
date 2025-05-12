@@ -2,6 +2,7 @@ from typing import Generator
 import os
 import yaml
 from pathlib import Path
+from typing import Callable
 
 from .base import BaseTemplate, TemplateProperties
 
@@ -9,6 +10,7 @@ from .base import BaseTemplate, TemplateProperties
 class FilesystemTemplate(BaseTemplate):
 
     template_properties_filename = 'template_properties.yaml'
+    variables_helper_filename = 'variables_helper.py'
 
     def __init__(self,
                  template_name: str,
@@ -16,6 +18,7 @@ class FilesystemTemplate(BaseTemplate):
                  ):
         self.template_dir = template_dir
         self.properties = self._load_properties()
+        self.variables_helper: Callable[[dict], dict] = self._load_variables_helper()
         self.template_name = template_name
 
     def _load_properties(self) -> TemplateProperties:
@@ -26,6 +29,20 @@ class FilesystemTemplate(BaseTemplate):
             properties = yaml.safe_load(file)
         properties = properties or {}
         return properties
+
+    def _load_variables_helper(self) -> Callable:
+        variables_helper_filename = Path(self.template_dir) / Path(self.variables_helper_filename)
+        if not os.path.exists(variables_helper_filename):
+            return lambda d: d
+        with open(variables_helper_filename, 'r') as file:
+            code = file.read()
+        exec_globals = {}
+        exec(code, exec_globals)
+        variables_helper = exec_globals.get('variables_helper')
+        if not callable(variables_helper):
+            raise ValueError(f"Variables helper in '{variables_helper_filename}' is not callable.")
+        return variables_helper
+
 
     def documents(self) -> Generator[tuple[str, str], None, None]:
         """

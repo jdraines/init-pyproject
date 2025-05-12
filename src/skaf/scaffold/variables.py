@@ -89,4 +89,6 @@ def get_variable_values(context: ScaffoldContext) -> dict[str, Any]:
                 raise type(e)(f"Invalid value for {varname} with type {vartype} and caster {caster}: {e}")
                 
     values = add_project_name_variables(context.project_name, values)
+    if context.template.variables_helper:
+        values = context.template.variables_helper(values)
     return values

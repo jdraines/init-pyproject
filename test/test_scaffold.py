@@ -19,8 +19,8 @@ from skaf.scaffold.context import (
 )
 
 from skaf.scaffold.variables import (
-    get_variable_values,
-    add_project_name_variables
+    add_project_name_variables,
+    get_variable_values
 )
 
 from skaf.scaffold.utils import (
@@ -28,7 +28,6 @@ from skaf.scaffold.utils import (
 )
 
 from skaf.templaters.jinja import Jinja2Templater
-from skaf.template_classes.filesystem_template import FilesystemTemplate
 
 
 class TestScaffoldUtilities:
@@ -92,7 +91,13 @@ class TestGetTemplateVariableValues:
         context.project_name = 'test_project'
         context.auto_use_defaults = False
         context.variables_filepath = None
+
+        def variables_helper(variables: dict) -> dict:
+            variables["from_helper"] = "HelperValue"
+            return variables
         
+        context.template.variables_helper = variables_helper
+
         # Setup input responses
         mock_input.side_effect = ['John Doe', '']
         
@@ -103,6 +108,7 @@ class TestGetTemplateVariableValues:
         assert result['author'] == 'John Doe'
         assert result['version'] == '0.1.0'
         assert result['project_name'] == 'test_project'
+        assert result['from_helper'] == 'HelperValue'
         assert 'project_name_snake' in result
         assert 'project_name_pascal' in result
     
@@ -120,6 +126,12 @@ class TestGetTemplateVariableValues:
         context.project_name = 'test_project'
         context.auto_use_defaults = True
         context.variables_filepath = None
+
+        def variables_helper(variables: dict) -> dict:
+            variables["from_helper"] = "HelperValue"
+            return variables
+        
+        context.template.variables_helper = variables_helper
         
         # Call function
         result = get_template_variable_values(context)
@@ -128,6 +140,7 @@ class TestGetTemplateVariableValues:
         assert result['author'] == 'Default Author'
         assert result['version'] == '0.1.0'
         assert result['keywords'] == ['one', 'two', 'three']
+        assert result['from_helper'] == 'HelperValue'
         assert result['project_name'] == 'test_project'
 
     @patch('builtins.input')
@@ -145,6 +158,12 @@ class TestGetTemplateVariableValues:
         context.auto_use_defaults = False
         context._debug = True
         context.variables_filepath = None
+
+        def variables_helper(variables: dict) -> dict:
+            variables["from_helper"] = "HelperValue"
+            return variables
+        
+        context.template.variables_helper = variables_helper
         
         # Setup input to cause ValueError
         mock_input.return_value = 'not-a-number'
@@ -217,6 +236,11 @@ class TestScaffoldContext:
         assert context.template == filesystem_template
         assert context.template_name == "test_template"
         assert context.templater is not None
+        assert context.template.variables_helper is not None
+
+        test_dict = {}
+        context.template.variables_helper(test_dict)
+        assert test_dict["from_helper"] == "HelperValue"
     
     def test_scaffold_context_with_sanitization(self, filesystem_template, temp_dir):
         context = ScaffoldContext(
