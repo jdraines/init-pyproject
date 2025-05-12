@@ -3,13 +3,14 @@ import yaml
 from pathlib import Path
 from git import Repo
 import tempfile
-from typing import Generator
+from typing import Generator, Callable
 
 from .base import BaseTemplate, TemplateProperties
 
 
 class GitTemplate(BaseTemplate):
     template_properties_filename = 'template_properties.yaml'
+    variables_helper_filename = 'variables_helper.py'
 
     def __init__(self, template_name: str, git_repo_path: str):
         self.template_name = template_name
@@ -19,6 +20,7 @@ class GitTemplate(BaseTemplate):
         with tempfile.TemporaryDirectory() as temp_dir:
             Repo.clone_from(git_repo_path, temp_dir)
             self.properties = self._load_properties(temp_dir)
+            self.variables_helper: Callable[[dict], dict] = self._load_variables_helper(temp_dir)
             self._load_documents(temp_dir)
 
     def _load_properties(self, temp_dir: str) -> TemplateProperties:
@@ -28,6 +30,19 @@ class GitTemplate(BaseTemplate):
         with open(properties_filename, 'r') as file:
             properties = yaml.safe_load(file)
         return properties or {}
+
+    def _load_variables_helper(self, temp_dir) -> Callable:
+        variables_helper_filename = Path(temp_dir) / Path(self.variables_helper_filename)
+        if not os.path.exists(variables_helper_filename):
+            return lambda d: d
+        with open(variables_helper_filename, 'r') as file:
+            code = file.read()
+        exec_globals = {}
+        exec(code, exec_globals)
+        variables_helper = exec_globals.get('variables_helper')
+        if not callable(variables_helper):
+            raise ValueError(f"Variables helper in '{variables_helper_filename}' is not callable.")
+        return variables_helper
 
     def _load_documents(self, temp_dir: str):
         template_root = Path(temp_dir) / "template"

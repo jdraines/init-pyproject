@@ -4,6 +4,8 @@ import shutil
 from pathlib import Path
 import pytest
 from typing import Generator
+from textwrap import dedent
+import yaml
 
 from skaf.template_classes.filesystem_template import FilesystemTemplate
 from skaf.templaters.jinja import Jinja2Templater
@@ -48,7 +50,7 @@ def sample_template_dir(temp_dir) -> Path:
         ]
     }
     
-    import yaml
+
     with open(template_dir / "template_properties.yaml", "w") as f:
         yaml.dump(props_content, f)
 
@@ -81,6 +83,13 @@ A project by {{ author }}.
 if __name__ == "__main__":
     main()
 """)
+        
+    with open(template_dir / "variables_helper.py", "w") as f:
+        f.write(dedent("""
+        def variables_helper(variables: dict) -> dict:
+            variables["from_helper"] = "HelperValue"
+            return variables
+        """))
 
     return template_dir
 

@@ -1,3 +1,5 @@
+from typing import Callable
+
 from .base import BaseTemplate, TemplateProperties
 
 
@@ -7,9 +9,11 @@ class DictTemplate(BaseTemplate):
                  template_name: str,
                  properties: TemplateProperties,
                  templates: dict[str, str],
+                 variables_helper: Callable[[dict], dict] = None,
                  ):
         self._init(template_name, properties)
         self.templates = templates
+        self.variables_helper = variables_helper or (lambda d: d)
 
     def documents(self):
         """
