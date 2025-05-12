@@ -105,7 +105,7 @@ pip install .
                            └── MyClass.java
    ```
 
-   When the user provides a namespace `com.mydomain.example`, the rendedered template would look like
+   When the user provides a namespace `com.mydomain.example`, the rendered template would look like
 
    ```
    my-template-root/
