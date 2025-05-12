@@ -162,40 +162,6 @@ skaf <project_name> [options]
    skaf my_project -o /path/to/output -p /path/to/my/template
    ```
 
-## Developing Templates
-
-To create and use custom templates in skaf, follow these steps:
-
-1. **Directory Setup**:
-   - In skaf, templates are directories of files that contain templating blocks.
-     Custom templates can be created in an location on your local machine and should have
-     the following structure:
-
-     ```
-     my-template-root/
-        ├── templates/
-        │   └── [any files you want]
-        └── template_properties.yaml   # this is metadata
-     ```
-
-2. **template_properties.yaml**:
-   - Define custom variables and the templating engine to use.
-   - Example properties:
-     ```yaml
-     custom_variables:
-       - name: "author_name"
-         type: "string"
-         default: "John Doe"
-         description: "The name of the project author."
-     templater: "jinja2"
-     ```
-
-3. **Render your template**
-   - Run the following command:
-     ```bash
-     skaf my-project --path path/to/my-template-root
-     ```
-
 ## Development Dependencies
 
 To contribute or run tests, install development dependencies:
